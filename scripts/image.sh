@@ -6,7 +6,7 @@
 #   scripts/image.sh push    build linux/amd64 and linux/arm64 and push <version> and sha-<commit>
 #
 # Environment: IMAGE_REPO (default docker.io/lrambo/posts-api), IMAGE (image to scan, default
-# posts-api:local), DOCKERFILE (default Dockerfile).
+# posts-api:local), DOCKERFILE (default Dockerfile), BUILDER (default posts-api-multiarch).
 set -euo pipefail
 # Git Bash on Windows would rewrite container paths such as /var/run/docker.sock
 export MSYS_NO_PATHCONV=1
@@ -17,7 +17,7 @@ IMAGE_REPO="${IMAGE_REPO:-docker.io/lrambo/posts-api}"
 IMAGE="${IMAGE:-posts-api:local}"
 DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 PLATFORMS="linux/amd64,linux/arm64"
-BUILDER="posts-api-multiarch"
+BUILDER="${BUILDER:-posts-api-multiarch}"
 HADOLINT_IMAGE="hadolint/hadolint:v2.15.1"
 TRIVY_IMAGE="aquasec/trivy:0.76.1"
 
@@ -56,15 +56,17 @@ cmd_push() {
   [[ -z "$(git status --porcelain)" ]] || die "the working tree has uncommitted changes; commit them first"
   local tag sha output
   tag="$(version)"
-  sha="$(git rev-parse --short=7 HEAD)"
+  # exactly 7 characters: --short grows the prefix when it is ambiguous
+  sha="$(git rev-parse HEAD | cut -c1-7)"
   if output="$(docker buildx imagetools inspect "$IMAGE_REPO:$tag" 2>&1)"; then
     die "$IMAGE_REPO:$tag already exists; versions are immutable, bump the version in package.json"
   elif ! grep -qi "not found" <<<"$output"; then
     die "cannot tell whether $IMAGE_REPO:$tag exists: $output"
   fi
-  # multi-platform images with attestations need a BuildKit container builder
+  # multi-platform images with attestations need a BuildKit container builder; host networking
+  # lets it reach a registry on localhost too
   docker buildx inspect "$BUILDER" >/dev/null 2>&1 ||
-    docker buildx create --name "$BUILDER" --driver docker-container >/dev/null
+    docker buildx create --name "$BUILDER" --driver docker-container --driver-opt network=host >/dev/null
   # shellcheck disable=SC2046 # word splitting of build_args is intended
   docker buildx build --builder "$BUILDER" --platform "$PLATFORMS" \
     --sbom=true --provenance=mode=max $(build_args) \
