@@ -68,13 +68,21 @@ export async function migratedDataSource(db: DatabaseConfig): Promise<DataSource
   return dataSource;
 }
 
-/** Empties every table and restarts ids at 1. */
+/**
+ * Empties every table and restarts ids at 1. `FOREIGN_KEY_CHECKS` is a session variable, so every
+ * statement runs on the same connection.
+ */
 export async function resetTables(dataSource: DataSource): Promise<void> {
-  await dataSource.query("SET FOREIGN_KEY_CHECKS = 0");
-  for (const table of ["post_categories_category", "category", "post"]) {
-    await dataSource.query(`TRUNCATE TABLE \`${table}\``);
+  const runner = dataSource.createQueryRunner();
+  try {
+    await runner.query("SET FOREIGN_KEY_CHECKS = 0");
+    for (const table of ["post_categories_category", "category", "post"]) {
+      await runner.query(`TRUNCATE TABLE \`${table}\``);
+    }
+    await runner.query("SET FOREIGN_KEY_CHECKS = 1");
+  } finally {
+    await runner.release();
   }
-  await dataSource.query("SET FOREIGN_KEY_CHECKS = 1");
 }
 
 export interface CapturedLogger {
