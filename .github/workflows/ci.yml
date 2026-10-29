@@ -97,6 +97,10 @@ jobs:
             terraform -chdir="$dir" init -backend=false -input=false
             terraform -chdir="$dir" validate
           done
+      - name: terraform test (AWS, mocked providers)
+        run: terraform -chdir=deploy/terraform/aws test
+      - name: misconfiguration scan
+        run: scripts/scan-terraform.sh deploy/terraform/aws
 
   e2e:
     name: end to end on kind
