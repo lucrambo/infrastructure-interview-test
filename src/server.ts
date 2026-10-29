@@ -103,8 +103,10 @@ export async function start({
       exit(1);
     }
   };
+  // `on`, not `once`: a repeated signal must reach the guard above, not Node's default handler,
+  // which would kill the process mid-drain
   for (const signal of ["SIGTERM", "SIGINT"]) {
-    signals.once(signal, () => void shutdown(signal));
+    signals.on(signal, () => void shutdown(signal));
   }
 
   return { app, server, port, shutdown };

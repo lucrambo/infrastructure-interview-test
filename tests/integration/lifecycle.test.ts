@@ -106,6 +106,31 @@ describe("lifecycle", () => {
     },
   );
 
+  it.each([
+    ["SIGTERM", "SIGTERM"],
+    ["SIGTERM", "SIGINT"],
+  ])("drains once when %s is followed by %s", async (first, second) => {
+    const { running, exit, signals } = await boot();
+    const slow = startSlowPost(running);
+    await settle();
+
+    signals.emit(first);
+    await settle();
+    signals.emit(second);
+    await settle();
+    expect(exit).not.toHaveBeenCalled();
+    expect(signals.listenerCount("SIGTERM")).toBe(1);
+    expect(signals.listenerCount("SIGINT")).toBe(1);
+
+    slow.finish();
+    expect((await slow.response).statusCode).toBe(201);
+    await vi.waitFor(() => {
+      expect(exit).toHaveBeenCalledWith(0);
+    });
+    await settle();
+    expect(exit).toHaveBeenCalledTimes(1);
+  });
+
   it("shutdown timeout exits 1 when a request never finishes", async () => {
     const { running, exit, signals } = await boot(500);
     // this request never completes: the cleanup destroys its socket
