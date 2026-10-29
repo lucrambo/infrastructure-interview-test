@@ -116,8 +116,10 @@ docker run --rm -e DB_HOST=... docker.io/lrambo/posts-api:0.1.0 \
 | `scripts/image.sh push`  | refuses a dirty tree or an existing version, then builds both platforms with SBOM and provenance and pushes both tags |
 | `yarn test:image`        | builds the image and tests it: contents, runtime against MySQL, the script and the published tags                     |
 
-To release, bump `version` in `package.json`, commit, run `scripts/image.sh scan`, then
-`scripts/image.sh push` while logged in to Docker Hub with push rights.
+Images are published only by the [`release`](.github/workflows/release.yml) workflow:
+`scripts/image.sh push` refuses `docker.io/lrambo/posts-api` outside GitHub Actions. To release,
+bump `version` in `package.json` (and `appVersion` in the chart), merge to `main`, then push the
+tag `v<version>`.
 
 ## Local Kubernetes
 
