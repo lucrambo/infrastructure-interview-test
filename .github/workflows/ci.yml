@@ -127,6 +127,12 @@ jobs:
           version: ${{ env.KIND_VERSION }}
           install_only: true
       - uses: grafana/setup-k6-action@43b9fc21641a76002687994433dd586f56e791b1 # v1.2.2
+      - name: kernel limits for 4 kind nodes and 3 MySQL servers
+        # each mysqld reserves native AIO contexts; the runner's default fs.aio-max-nr runs out
+        run: |
+          sudo sysctl -w fs.aio-max-nr=1048576
+          sudo sysctl -w fs.inotify.max_user_instances=1024
+          sudo sysctl -w fs.inotify.max_user_watches=1048576
       - run: corepack enable
       - run: yarn install --immutable
       - run: scripts/local.sh all
@@ -136,6 +142,11 @@ jobs:
           export KUBECONFIG=deploy/terraform/local/.kubeconfig
           kubectl get pods -A -o wide || true
           kubectl get events -A --sort-by=.lastTimestamp | tail -50 || true
+          for pod in mysql-0 mysql-1 mysql-2; do
+            kubectl logs -n database "$pod" -c mysql --tail=40 || true
+            kubectl logs -n database "$pod" -c mysql --previous --tail=40 || true
+          done
+          kubectl logs -n mysql-operator deploy/mysql-operator --tail=60 || true
       - name: tear down
         if: always()
         run: scripts/local.sh down || true
