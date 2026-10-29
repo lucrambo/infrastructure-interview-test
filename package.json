@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
-    "test": "vitest run",
+    "test": "vitest run --project app",
+    "test:image": "vitest run --project image",
     "migration:run": "node --env-file-if-exists=.env node_modules/typeorm/cli.js migration:run -d dist/data-source.js",
     "migration:revert": "node --env-file-if-exists=.env node_modules/typeorm/cli.js migration:revert -d dist/data-source.js"
   },
