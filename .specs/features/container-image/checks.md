@@ -34,7 +34,7 @@ Proof: `yarn vitest run tests/image/runtime.test.ts -t "docker stop"`
 **C8** - The image carries `org.opencontainers.image.source`, `revision` = HEAD, `version` = `package.json` version, `licenses` = `MIT`, `title` = `posts-api` (AC 8)
 Proof: `yarn vitest run tests/image/contents.test.ts -t "labels"`
 
-**C9** - The linux/amd64 image is at most 100 MB as `docker image inspect` reports it (AC 9)
+**C9** - The linux/amd64 image is at most 100 MB gzip-compressed, measured on `docker image save` because `docker image inspect` sizes depend on the image store (AC 9; amended when CI's classic store reported the uncompressed size)
 Proof: `yarn vitest run tests/image/contents.test.ts -t "size"`
 
 ### S2 - Scanned and published

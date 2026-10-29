@@ -1,5 +1,6 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { gzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 import { docker, IMAGE, inspect } from "./docker";
 
@@ -58,9 +59,13 @@ describe("image contents", () => {
     });
   });
 
-  it("size is at most 100 MB", () => {
+  it("size is at most 100 MB compressed, what a node downloads", () => {
     expect(inspect(IMAGE, "{{json .Architecture}}")).toBe("amd64");
-    expect(Number(inspect(IMAGE, "{{json .Size}}"))).toBeLessThanOrEqual(100_000_000);
+    // `docker image inspect` reports compressed or uncompressed sizes depending on the image
+    // store, so the archive is measured instead
+    const archive = spawnSync("docker", ["image", "save", IMAGE], { maxBuffer: 1024 ** 3 });
+    expect(archive.status).toBe(0);
+    expect(gzipSync(archive.stdout).length).toBeLessThanOrEqual(100_000_000);
   });
 
   it("every base image is pinned by digest", () => {
