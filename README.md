@@ -1,12 +1,15 @@
 # Posts API
 
+> **The exercise:** this repository answers the Cloud Infrastructure interview test. Its original
+> statement, the README the repository was delivered with, is kept verbatim in
+> [docs/challenge.md](docs/challenge.md).
+
 HTTP API for posts and their categories, written in TypeScript (Express 5, TypeORM) on MySQL 8.4.
 It is built to run as several stateless replicas behind a load balancer: configuration comes from
 the environment, the schema is owned by versioned migrations, and every replica exposes liveness,
 readiness and Prometheus metrics.
 
-The original exercise statement is kept in [docs/challenge.md](docs/challenge.md). Design
-decisions are logged in [.specs/STATE.md](.specs/STATE.md), with the important ones as ADRs in
+Design decisions are logged in [.specs/STATE.md](.specs/STATE.md), with the important ones as ADRs in
 [docs/adr/](docs/adr/).
 
 ## How the exercise is answered
