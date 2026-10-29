@@ -30,3 +30,6 @@ Thumbs.db
 
 # Python bytecode (skill scripts)
 __pycache__/
+
+# Agent worktrees
+.claude/worktrees/
