@@ -105,7 +105,7 @@ def short(text, n=40):
 def run_proof(cmd, root, timeout):
     """Return (exit code or 'timeout', combined output). Kills the whole process group on timeout."""
     proc = subprocess.Popen(cmd, shell=True, cwd=root, stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT, text=True, start_new_session=True)
+                            stderr=subprocess.STDOUT, text=True, start_new_session=os.name != "nt")
     RUNNING.append(proc)
     try:
         out, _ = proc.communicate(timeout=timeout)
@@ -119,6 +119,10 @@ def run_proof(cmd, root, timeout):
 
 
 def kill_group(proc):
+    # local patch: Windows has no process groups; taskkill /T ends the shell and its children
+    if os.name == "nt":
+        subprocess.run(["taskkill", "/pid", str(proc.pid), "/T", "/F"], capture_output=True)
+        return
     try:
         os.killpg(proc.pid, signal.SIGKILL)
     except ProcessLookupError:
@@ -211,8 +215,10 @@ def main(argv=None):
         print(f"\nmutate: interrupted by signal {signum} - tree restored", file=sys.stderr)
         raise SystemExit(130)
 
-    for s in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
-        signal.signal(s, on_signal)
+    # local patch: SIGHUP does not exist on Windows
+    for s in (signal.SIGINT, signal.SIGTERM, getattr(signal, "SIGHUP", None)):
+        if s is not None:
+            signal.signal(s, on_signal)
 
     baseline = {}
     for proof in dict.fromkeys(f["proof"] for f in mutations):
