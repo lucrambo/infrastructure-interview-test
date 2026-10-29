@@ -50,6 +50,30 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: verification.md finding 6; tests/helpers.ts (tests)
 - last seen: 2026-10-29T05:21:28Z
 
+### L-007 - Exercise a release script's publish path against a throwaway local registry; inspecting what is already published proves nothing about the next push
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `release` · harmful: 0
+- features: container-image
+- evidence: verification.md finding 1; scripts/image.sh (release)
+- last seen: 2026-10-29T06:23:22Z
+
+### L-008 - Assert each severity a scan must catch separately; an alternation regex passes when only one of them is scanned
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `scanning` · harmful: 0
+- features: container-image
+- evidence: verification.md finding 2; tests/image/scripts.test.ts (scanning)
+- last seen: 2026-10-29T06:23:22Z
+
+### L-009 - Run tests of clean-tree guards in a committed snapshot clone so mutations and local edits cannot satisfy the guard for the wrong reason
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `release` · harmful: 0
+- features: container-image
+- evidence: verification.md finding 3; tests/image/scripts.test.ts (release)
+- last seen: 2026-10-29T06:23:22Z
+
+### L-010 - Tie a commit tag to the revision recorded in the image, not to a tag-name pattern
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `release` · harmful: 0
+- features: container-image
+- evidence: verification.md finding 4; tests/image/registry.test.ts (release)
+- last seen: 2026-10-29T06:23:22Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

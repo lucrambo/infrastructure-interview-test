@@ -1,8 +1,8 @@
 # container-image proofs
 
-**HEAD**: c2ea46d
+**HEAD**: 3180698
 **Tree**: clean
-**Result**: 20 pass, 0 fail; mutations 2 killed, 1 not
+**Result**: 20 pass, 0 fail; mutations 3 killed, 0 not
 
 | Check | Proof | Ran | Passed | Result |
 | --- | --- | --- | --- | --- |
@@ -31,6 +31,6 @@
 
 | Mutation | Location | Killed |
 | --- | --- | --- |
-| push builds linux/amd64 only (arm64 dropped) | `scripts\image.sh:19` | no |
+| push builds linux/amd64 only (arm64 dropped) | `scripts\image.sh:19` | yes |
 | scan ignores HIGH vulnerabilities | `scripts\image.sh:50` | yes |
 | runtime image ships dev dependencies (no production focus) | `Dockerfile:12` | yes |

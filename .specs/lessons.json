@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 7,
+  "next_id": 11,
   "lessons": [
     {
       "id": "L-001",
@@ -112,6 +112,78 @@
       ],
       "created": "2026-10-29T05:21:28Z",
       "last_seen": "2026-10-29T05:21:28Z"
+    },
+    {
+      "id": "L-007",
+      "key": "surviving_mutant::exercise a release script s publish path against a throwaway local registry inspecting what is already published proves nothing about the next push",
+      "text": "Exercise a release script's publish path against a throwaway local registry; inspecting what is already published proves nothing about the next push",
+      "signal": "surviving_mutant",
+      "scope": "release",
+      "status": "candidate",
+      "features": [
+        "container-image"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 1; scripts/image.sh (release)"
+      ],
+      "created": "2026-10-29T06:23:22Z",
+      "last_seen": "2026-10-29T06:23:22Z"
+    },
+    {
+      "id": "L-008",
+      "key": "spec_precision_gap::assert each severity a scan must catch separately an alternation regex passes when only one of them is scanned",
+      "text": "Assert each severity a scan must catch separately; an alternation regex passes when only one of them is scanned",
+      "signal": "spec_precision_gap",
+      "scope": "scanning",
+      "status": "candidate",
+      "features": [
+        "container-image"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 2; tests/image/scripts.test.ts (scanning)"
+      ],
+      "created": "2026-10-29T06:23:22Z",
+      "last_seen": "2026-10-29T06:23:22Z"
+    },
+    {
+      "id": "L-009",
+      "key": "spec_precision_gap::run tests of clean tree guards in a committed snapshot clone so mutations and local edits cannot satisfy the guard for the wrong reason",
+      "text": "Run tests of clean-tree guards in a committed snapshot clone so mutations and local edits cannot satisfy the guard for the wrong reason",
+      "signal": "spec_precision_gap",
+      "scope": "release",
+      "status": "candidate",
+      "features": [
+        "container-image"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 3; tests/image/scripts.test.ts (release)"
+      ],
+      "created": "2026-10-29T06:23:22Z",
+      "last_seen": "2026-10-29T06:23:22Z"
+    },
+    {
+      "id": "L-010",
+      "key": "ac_gap::tie a commit tag to the revision recorded in the image not to a tag name pattern",
+      "text": "Tie a commit tag to the revision recorded in the image, not to a tag-name pattern",
+      "signal": "ac_gap",
+      "scope": "release",
+      "status": "candidate",
+      "features": [
+        "container-image"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 4; tests/image/registry.test.ts (release)"
+      ],
+      "created": "2026-10-29T06:23:22Z",
+      "last_seen": "2026-10-29T06:23:22Z"
     }
   ]
 }
