@@ -37,11 +37,14 @@ spec:
       securityContext:
         {{- include "posts-api.podSecurityContext" . | nindent 8 }}
       terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      # matchLabelKeys spreads each revision on its own: during a rollout the old pods must not
+      # skew where the new ones land
       topologySpreadConstraints:
         # hard: a zone outage must never take more than its share of replicas
         - maxSkew: 1
           topologyKey: topology.kubernetes.io/zone
           whenUnsatisfiable: DoNotSchedule
+          matchLabelKeys: ["pod-template-hash"]
           labelSelector:
             matchLabels:
               {{- include "posts-api.apiSelectorLabels" . | nindent 14 }}
@@ -49,6 +52,7 @@ spec:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
           whenUnsatisfiable: ScheduleAnyway
+          matchLabelKeys: ["pod-template-hash"]
           labelSelector:
             matchLabels:
               {{- include "posts-api.apiSelectorLabels" . | nindent 14 }}

@@ -11,12 +11,14 @@ describe("availability", () => {
         maxSkew: 1,
         topologyKey: "topology.kubernetes.io/zone",
         whenUnsatisfiable: "DoNotSchedule",
+        matchLabelKeys: ["pod-template-hash"],
         labelSelector: { matchLabels: API_SELECTOR },
       },
       {
         maxSkew: 1,
         topologyKey: "kubernetes.io/hostname",
         whenUnsatisfiable: "ScheduleAnyway",
+        matchLabelKeys: ["pod-template-hash"],
         labelSelector: { matchLabels: API_SELECTOR },
       },
     ]);
