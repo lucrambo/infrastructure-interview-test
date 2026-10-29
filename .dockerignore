@@ -1,0 +1,9 @@
+# Allowlist: the build context holds only what the build stage copies, so secrets such as .env
+# and local files never reach the builder.
+*
+!package.json
+!yarn.lock
+!.yarnrc.yml
+!tsconfig.json
+!tsconfig.build.json
+!src/
