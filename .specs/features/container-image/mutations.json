@@ -3,7 +3,7 @@
     "file": "scripts/image.sh",
     "old": "PLATFORMS=\"linux/amd64,linux/arm64\"",
     "new": "PLATFORMS=\"linux/amd64\"",
-    "proof": "yarn vitest run tests/image/registry.test.ts -t \"published index\"",
+    "proof": "yarn vitest run tests/image/scripts.test.ts -t \"push builds\"",
     "label": "push builds linux/amd64 only (arm64 dropped)"
   },
   {

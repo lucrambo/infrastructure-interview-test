@@ -1,8 +1,8 @@
 # container-image proofs
 
-**HEAD**: e901094
+**HEAD**: c2ea46d
 **Tree**: clean
-**Result**: 19 pass, 0 fail; mutations 0 killed, 0 not
+**Result**: 20 pass, 0 fail; mutations 2 killed, 1 not
 
 | Check | Proof | Ran | Passed | Result |
 | --- | --- | --- | --- | --- |
@@ -22,6 +22,15 @@
 | C14 | `yarn vitest run tests/image/scripts.test.ts -t "existing version"` | 1 | 1 | pass |
 | C15 | `yarn vitest run tests/image/registry.test.ts -t "anonymous"` | 1 | 1 | pass |
 | C16 | `yarn vitest run tests/image/contents.test.ts -t "digest"` | 1 | 1 | pass |
+| C17 | `yarn vitest run tests/image/scripts.test.ts -t "push builds"` | 1 | 1 | pass |
 | Build | `yarn build` | - | - | pass |
 | Build | `yarn typecheck` | - | - | pass |
 | Build | `yarn lint` | - | - | pass |
+
+## Mutations
+
+| Mutation | Location | Killed |
+| --- | --- | --- |
+| push builds linux/amd64 only (arm64 dropped) | `scripts\image.sh:19` | no |
+| scan ignores HIGH vulnerabilities | `scripts\image.sh:50` | yes |
+| runtime image ships dev dependencies (no production focus) | `Dockerfile:12` | yes |
