@@ -104,6 +104,21 @@ function k6Args(script: string, vars: Record<string, string>, summaryFile: strin
   ];
 }
 
+/**
+ * k6's --summary-export writes each metric's values flat (`{"passes": 0, "fails": 3}`); expose
+ * them under `values` whatever the version.
+ */
+function readSummary(file: string): K6Result["summary"] {
+  const raw = JSON.parse(readFileSync(file, "utf8")) as {
+    metrics: Record<string, Record<string, unknown>>;
+  };
+  const metrics: K6Result["summary"]["metrics"] = {};
+  for (const [name, metric] of Object.entries(raw.metrics)) {
+    metrics[name] = { values: (metric.values ?? metric) as Record<string, number> };
+  }
+  return { metrics };
+}
+
 /** Runs a k6 scenario to completion. */
 export function k6(script: string, vars: Record<string, string> = {}): K6Result {
   const dir = mkdtempSync(join(tmpdir(), "k6-"));
@@ -113,7 +128,7 @@ export function k6(script: string, vars: Record<string, string> = {}): K6Result 
     return {
       status: result.status,
       output: `${result.stdout}${result.stderr}`,
-      summary: JSON.parse(readFileSync(file, "utf8")) as K6Result["summary"],
+      summary: readSummary(file),
     };
   } finally {
     rmSync(dir, { recursive: true, force: true });
@@ -130,7 +145,7 @@ export function k6Background(script: string, vars: Record<string, string> = {}):
   child.stderr.on("data", (chunk: Buffer) => (output += chunk.toString()));
   return new Promise((resolve) => {
     child.on("exit", (status) => {
-      const summary = JSON.parse(readFileSync(file, "utf8")) as K6Result["summary"];
+      const summary = readSummary(file);
       rmSync(dir, { recursive: true, force: true });
       resolve({ status, output, summary });
     });
