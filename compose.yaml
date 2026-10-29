@@ -1,0 +1,25 @@
+# Local development only: a MySQL server matching production's major line (ADR-001).
+# The credentials below are throwaway values for a database bound to 127.0.0.1.
+name: posts-api
+
+services:
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: posts
+      MYSQL_USER: posts
+      MYSQL_PASSWORD: posts
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      # TCP is closed while the image initialises, so this passes only once the server is ready
+      test: ["CMD", "mysqladmin", "ping", "--host=127.0.0.1", "--user=posts", "--password=posts"]
+      interval: 2s
+      timeout: 5s
+      retries: 60
+
+volumes:
+  db-data:

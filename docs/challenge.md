@@ -53,13 +53,13 @@ While not all of these need to be implemented, the more of them that are complet
 - Configure the local kubernetes cluster to have 2+ worker nodes;
 - Use [Helm](https://helm.sh/) on your application;
 - Use [Terraform](https://www.terraform.io/) to configure the local environment of your application;
-  - Use it to configure a remote environment on any cloud provider as well;  
+  - Use it to configure a remote environment on any cloud provider as well;
 
 ## How to run this application
 
 1. run `yarn install`
 1. copy `ormconfig.env.example` to `ormconfig.env` and fill in the database credentials (this file is git-ignored)
-2. create a SQL database with `docker run -p 3306:3306 -e MYSQL_ROOT_PASSWORD=test -e MYSQL_DATABASE=test -e MYSQL_USER=test -e MYSQL_PASSWORD=test -d mariadb:5.5`
-3. run `yarn typeorm migration:run`
-4. open `http://localhost:3000/posts` and see an empty list
-5. test with `curl`, `postman` or similar tools
+1. create a SQL database with `docker run -p 3306:3306 -e MYSQL_ROOT_PASSWORD=test -e MYSQL_DATABASE=test -e MYSQL_USER=test -e MYSQL_PASSWORD=test -d mariadb:5.5`
+1. run `yarn typeorm migration:run`
+1. open `http://localhost:3000/posts` and see an empty list
+1. test with `curl`, `postman` or similar tools
