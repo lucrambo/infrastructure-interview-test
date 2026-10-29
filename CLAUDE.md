@@ -13,7 +13,8 @@ and non-Express security references were removed. Local patches for Windows: `tl
   `chore:`, `docs:`, `test:`, `ci:`, `build:`, `refactor:`, with an optional scope). Validate
   the message with `python .claude/skills/tlc-spec-lean/scripts/check_commit.py --message "<msg>"`.
 - `mutate.py` runs natively on Windows through a local patch (no `SIGHUP`; `taskkill /T` instead
-  of `os.killpg`), so `check_proofs.py --mutations` runs every proof, the README one included.
+  of `os.killpg`), so `check_proofs.py --mutations` runs every proof, the README one included. Set
+  `PYTHONUTF8=1` so the scripts decode test output as UTF-8.
 - `tlc-spec-lean`: an approved plan authorizes local edits and commits only; `git push`, publishing
   images and changes to a remote cluster need an explicit go-ahead each time.
 - `create-adr`: only for the most important decisions. Every decision goes in `.specs/STATE.md`;
