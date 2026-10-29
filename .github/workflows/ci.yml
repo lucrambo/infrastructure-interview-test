@@ -127,9 +127,14 @@ jobs:
           version: ${{ env.KIND_VERSION }}
           install_only: true
       - uses: grafana/setup-k6-action@43b9fc21641a76002687994433dd586f56e791b1 # v1.2.2
-      - name: kernel limits for 4 kind nodes and 3 MySQL servers
-        # each mysqld reserves native AIO contexts; the runner's default fs.aio-max-nr runs out
+      - name: host settings for 4 kind nodes and 3 MySQL servers
+        # the runner ships MySQL with an AppArmor profile for /usr/sbin/mysqld, which the kernel
+        # also applies to the mysqld inside the kind nodes and denies its socket and data paths;
+        # each mysqld also reserves native AIO contexts
         run: |
+          if [ -f /etc/apparmor.d/usr.sbin.mysqld ]; then
+            sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.mysqld
+          fi
           sudo sysctl -w fs.aio-max-nr=1048576
           sudo sysctl -w fs.inotify.max_user_instances=1024
           sudo sysctl -w fs.inotify.max_user_watches=1048576
