@@ -1,25 +1,28 @@
-import {Request, Response} from "express";
-import {getManager} from "typeorm";
-import {Post} from "../entity/Post";
+import type { Request, Response } from "express";
+import type { DataSource } from "typeorm";
+import { Post } from "../entity/Post";
+import { HttpError } from "../http/errors";
+import { idParamSchema, parse } from "../http/validation";
 
 /**
  * Loads post by a given id.
  */
-export async function postGetByIdAction(request: Request, response: Response) {
+export async function postGetByIdAction(
+  request: Request,
+  response: Response,
+  dataSource: DataSource,
+): Promise<void> {
+  const { id } = parse(idParamSchema, request.params);
 
-    // get a post repository to perform operations with post
-    const postRepository = getManager().getRepository(Post);
+  const post = await dataSource.getRepository(Post).findOne({
+    where: { id },
+    relations: { categories: true },
+    order: { categories: { id: "ASC" } },
+  });
 
-    // load a post by a given post id
-    const post = await postRepository.findOne(request.params.id);
+  if (!post) {
+    throw new HttpError(404, `Post ${id} does not exist`);
+  }
 
-    // if post was not found return 404 to the client
-    if (!post) {
-        response.status(404);
-        response.end();
-        return;
-    }
-
-    // return loaded post
-    response.send(post);
+  response.json(post);
 }
