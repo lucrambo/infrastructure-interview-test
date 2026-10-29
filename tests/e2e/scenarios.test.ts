@@ -7,7 +7,8 @@ describe("scenarios", () => {
     expect(result.status, result.output).toBe(0);
     const checks = result.summary.metrics.checks?.values;
     expect(checks?.fails).toBe(0);
-    expect(checks?.passes).toBeGreaterThanOrEqual(15);
+    // one per check in tests/k6/functional.js
+    expect(checks?.passes).toBe(14);
   });
 
   it("load scenario at 30 req/s for 60 s keeps failures under 1% and p95 under 500 ms", () => {

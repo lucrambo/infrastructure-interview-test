@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gateway, kubectl, kubectlJson, nodeZones, pods, run, tfOutput } from "./cluster";
+import { gateway, kubectl, kubectlJson, nodeZones, pods, run, tfOutput, waitFor } from "./cluster";
 
 describe("platform", () => {
   it("cluster has one control-plane and zoned workers", () => {
@@ -38,7 +38,23 @@ describe("platform", () => {
     expect(top.stdout.trim().split("\n")).toHaveLength(4);
   });
 
-  it("database: InnoDB Cluster online with one member per zone, routers in two zones, app user works", () => {
+  it("database: InnoDB Cluster online with one member per zone, routers in two zones, app user works", async () => {
+    // a scenario run before this one may have just recreated a member
+    await waitFor(
+      "every member to be online and ready",
+      () =>
+        pods("database", "mysql.oracle.com/cluster=mysql,component=mysqld").every((p) =>
+          (p.status.containerStatuses ?? []).every((c) => c.ready),
+        ) &&
+        kubectlJson<{ status: { cluster: { onlineInstances: number } } }>(
+          "get",
+          "innodbcluster",
+          "mysql",
+          "-n",
+          "database",
+        ).status.cluster.onlineInstances === 3,
+      300_000,
+    );
     const cluster = kubectlJson<{
       status: { cluster: { status: string; onlineInstances: number } };
     }>("get", "innodbcluster", "mysql", "-n", "database");
