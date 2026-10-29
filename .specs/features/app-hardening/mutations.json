@@ -1,0 +1,23 @@
+[
+  {
+    "file": "src/app.ts",
+    "old": "const READINESS_TIMEOUT_MS = 1000;",
+    "new": "const READINESS_TIMEOUT_MS = 1900;",
+    "proof": "yarn vitest run tests/integration/health.test.ts -t \"readyz not ready\"",
+    "label": "readiness timeout 1000 ms -> 1900 ms"
+  },
+  {
+    "file": "src/controller/PostGetAllAction.ts",
+    "old": "{ id: MoreThan(after) }",
+    "new": "{ id: MoreThan(after - 1) }",
+    "proof": "yarn vitest run tests/integration/posts.test.ts -t \"GET /posts pagination\"",
+    "label": "keyset cursor id > after -> id >= after"
+  },
+  {
+    "file": "src/server.ts",
+    "old": "    if (draining) return;\n",
+    "new": "    if (draining && false) return;\n",
+    "proof": "yarn vitest run tests/integration/lifecycle.test.ts -t \"drains\"",
+    "label": "second shutdown signal while draining is no longer ignored"
+  }
+]
