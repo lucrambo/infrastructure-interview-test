@@ -1,0 +1,22 @@
+# Values for the local kind environment. `scripts/local.sh deploy` adds the image, the private
+# registry credentials and the database endpoint from the Terraform outputs.
+
+database:
+  # created by Terraform in the app namespace
+  existingSecret: posts-db
+  password: ""
+
+httpRoute:
+  parentRefs:
+    - name: public
+      namespace: gateway
+
+# per Envoy replica; the load scenario stays below it and the burst scenario goes above it
+rateLimit:
+  enabled: true
+  requests: 50
+  unit: Second
+
+networkPolicy:
+  gatewayNamespace: envoy-gateway-system
+  monitoringNamespace: monitoring
