@@ -65,16 +65,26 @@ describe("published image", () => {
     ]);
     expect(provenance.stdout).toContain("lucrambo/infrastructure-interview-test");
 
+    const labels = docker([
+      "buildx",
+      "imagetools",
+      "inspect",
+      `docker.io/${REPOSITORY}:${pkg.version}`,
+      "--format",
+      '{{ json (index .Image "linux/amd64").Config.Labels }}',
+    ]);
+    const revision = (JSON.parse(labels.stdout) as Record<string, string>)[
+      "org.opencontainers.image.revision"
+    ];
+    expect(revision).toMatch(/^[0-9a-f]{40}$/);
+
     const tags = (await (
       await fetch(`https://hub.docker.com/v2/repositories/${REPOSITORY}/tags?page_size=100`)
     ).json()) as { results: { name: string; digest: string }[] };
     const version = tags.results.find((t) => t.name === pkg.version);
-    const commit = tags.results.filter(
-      (t) => t.name.startsWith("sha-") && t.digest === version?.digest,
-    );
+    const commit = tags.results.find((t) => t.name === `sha-${String(revision).slice(0, 7)}`);
     expect(version).toBeDefined();
-    expect(commit).toHaveLength(1);
-    expect(commit[0]?.name).toMatch(/^sha-[0-9a-f]{7}$/);
+    expect(commit?.digest).toBe(version?.digest);
     expect(tags.results.map((t) => t.name)).not.toContain("latest");
   });
 
