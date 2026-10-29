@@ -18,6 +18,15 @@ export default tseslint.config(
     ...tseslint.configs.disableTypeChecked,
   },
   {
+    // k6 scenarios run in k6's JavaScript runtime, not Node.js
+    files: ["tests/k6/**/*.js"],
+    ...tseslint.configs.disableTypeChecked,
+    languageOptions: {
+      ...tseslint.configs.disableTypeChecked.languageOptions,
+      globals: { __ENV: "readonly", __VU: "readonly", __ITER: "readonly" },
+    },
+  },
+  {
     files: ["**/*.ts", "**/*.mts"],
     rules: {
       "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],

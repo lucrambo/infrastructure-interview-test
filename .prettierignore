@@ -6,3 +6,8 @@ yarn.lock
 .specs
 docs/adr
 deploy/helm/posts-api/templates
+**/.terraform
+**/*.tfstate
+**/*.tfstate.*
+**/.kubeconfig
+deploy/terraform/local/charts/*/templates

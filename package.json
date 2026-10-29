@@ -16,6 +16,8 @@
     "test": "vitest run --project app",
     "test:image": "vitest run --project image",
     "test:chart": "vitest run --project chart",
+    "test:e2e": "vitest run --project e2e",
+    "test:ci": "vitest run --project ci",
     "migration:run": "node --env-file-if-exists=.env node_modules/typeorm/cli.js migration:run -d dist/data-source.js",
     "migration:revert": "node --env-file-if-exists=.env node_modules/typeorm/cli.js migration:revert -d dist/data-source.js"
   },
