@@ -89,7 +89,7 @@ Proof: `yarn vitest run tests/image/contents.test.ts -t "digest"`
 
 ## Handoff
 
-- **Settled mid-build:** none
+- **Settled mid-build:** 2026-10-29 - first publish of `0.1.0` and `sha-186d9b3` authorized - user chose "Sim, publicar agora"
 - **Dispatched:** none
-- **Boundary:** none closed yet
-- **Abandoned:** none
+- **Boundary:** C1-C16 closed at `186d9b3`; image published as `docker.io/lrambo/posts-api@sha256:70c5e12fe58e2f226ccf03453d06515d2cedc29e1e087a93402dc9572ea04de0`
+- **Abandoned:** none - `scripts/image.sh` landed in the Dockerfile commit `6a36bb5` because `git update-index --chmod` had already staged it
