@@ -1,0 +1,9 @@
+# Accepted misconfiguration findings, each with its reason (aws-env AC 2).
+
+# AWS-0040 public EKS API endpoint: it answers only the CIDRs in var.api_allowed_cidrs, whose
+# validation refuses 0.0.0.0/0; CI runners and operators need it, nodes use the private endpoint.
+AWS-0040
+
+# AWS-0104 node security group egress to 0.0.0.0/0: nodes pull images from Docker Hub and call
+# AWS APIs through the NAT gateways; pod egress is restricted by the chart's NetworkPolicy.
+AWS-0104

@@ -1,0 +1,48 @@
+# Creates the application user with the RDS master credentials, over TLS. RDS manages only the
+# master user; every statement is idempotent and the hook reruns on each upgrade.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: database-user
+  namespace: database-init
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 10
+  activeDeadlineSeconds: 900
+  template:
+    spec:
+      restartPolicy: OnFailure
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: init
+          image: {{ .Values.mysqlImage }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          env:
+            - name: MYSQL_USER_NAME
+              valueFrom:
+                secretKeyRef: { name: database-init, key: master-username }
+            - name: MYSQL_PWD
+              valueFrom:
+                secretKeyRef: { name: database-init, key: master-password }
+            - name: APP_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: database-init, key: app-password }
+          command:
+            - bash
+            - -ec
+            - |
+              mysql --host={{ .Values.databaseHost }} --user="$MYSQL_USER_NAME" --ssl-mode=REQUIRED --connect-timeout=10 <<SQL
+              CREATE USER IF NOT EXISTS 'posts'@'%' IDENTIFIED BY '${APP_PASSWORD}' REQUIRE SSL;
+              ALTER USER 'posts'@'%' IDENTIFIED BY '${APP_PASSWORD}' REQUIRE SSL;
+              GRANT ALL PRIVILEGES ON \`posts\`.* TO 'posts'@'%';
+              SQL
