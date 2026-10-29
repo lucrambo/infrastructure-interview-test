@@ -243,6 +243,6 @@ The next engineer can build, check and run the service from a clean clone.
 
 ## Sources
 
-- `README.md` (the test statement) - the request - "production grade code", evaluation criteria and requirements
+- `docs/challenge.md` (the test statement, formerly `README.md`) - the request - "production grade code", evaluation criteria and requirements
 - `src/index.ts`, `src/controller/*`, `src/entity/*`, `package.json`, `tsconfig.json`, `ormconfig.env.example` - the code as delivered
 - `.specs/STATE.md` AD-001 - MySQL 8.4 as the engine
