@@ -105,10 +105,10 @@ it runs with a read-only root filesystem.
 ```bash
 docker run --rm -p 3000:3000 \
   -e DB_HOST=<host> -e DB_USER=<user> -e DB_PASSWORD=<password> -e DB_NAME=<database> \
-  docker.io/lrambo/posts-api:0.1.1
+  docker.io/lrambo/posts-api:0.1.0
 
 # migrations, from the same image
-docker run --rm -e DB_HOST=... docker.io/lrambo/posts-api:0.1.1 \
+docker run --rm -e DB_HOST=... docker.io/lrambo/posts-api:0.1.0 \
   node_modules/typeorm/cli.js migration:run -d dist/data-source.js
 ```
 
