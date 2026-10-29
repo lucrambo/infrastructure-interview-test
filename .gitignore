@@ -1,0 +1,24 @@
+# Dependencies
+node_modules
+
+# Build output
+src/**/*.js
+src/**/*.js.map
+dist/
+
+# Environment / secrets
+ormconfig.env
+.env
+.env.*
+!*.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
