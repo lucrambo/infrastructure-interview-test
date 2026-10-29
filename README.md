@@ -9,6 +9,59 @@ The original exercise statement is kept in [docs/challenge.md](docs/challenge.md
 decisions are logged in [.specs/STATE.md](.specs/STATE.md), with the important ones as ADRs in
 [docs/adr/](docs/adr/).
 
+## How the exercise is answered
+
+| Asked                            | Where                                                                                                                                                                                                                                    |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Image in a public repository  | [`docker.io/lrambo/posts-api`](https://hub.docker.com/r/lrambo/posts-api), built by [`Dockerfile`](Dockerfile) and [`scripts/image.sh`](scripts/image.sh) ([Container image](#container-image))                                          |
+| 2. Deploy to Kubernetes          | Helm chart [`deploy/helm/posts-api`](deploy/helm/posts-api)                                                                                                                                                                              |
+| 3. Expose it outside the cluster | Gateway API `HTTPRoute` through Envoy Gateway, only `/posts` ([ADR-003](docs/adr/003-expose-through-the-gateway-api.md))                                                                                                                 |
+| 4. Highly available over 3 zones | replicas spread one per zone, PDB, HPA, zero-downtime rollouts and shutdown; MySQL with one member per zone ([ADR-001](docs/adr/001-use-mysql-with-innodb-cluster-and-rds-multi-az.md)); proven by the zone-outage and rollout scenarios |
+| Private registry authentication  | the chart's `imageCredentials`; the local cluster pulls from an authenticated registry                                                                                                                                                   |
+| Build and deploy script          | [`scripts/image.sh`](scripts/image.sh), [`scripts/local.sh`](scripts/local.sh)                                                                                                                                                           |
+| Reverse proxy                    | Envoy Gateway, with edge rate limiting                                                                                                                                                                                                   |
+| Test scenarios                   | unit, integration, image, chart and end-to-end suites, k6 functional, load and burst scenarios                                                                                                                                           |
+| Local cluster script, 2+ workers | `scripts/local.sh all`: kind with 3 workers in 3 zones                                                                                                                                                                                   |
+| Helm                             | [`deploy/helm/posts-api`](deploy/helm/posts-api)                                                                                                                                                                                         |
+| Terraform, local and remote      | [`deploy/terraform/local`](deploy/terraform/local) (applied by `scripts/local.sh`), [`deploy/terraform/aws`](deploy/terraform/aws) (code only)                                                                                           |
+
+The application itself was hardened for production first: configuration validated from the
+environment, migrations instead of schema sync, input validation, keyset pagination, RFC 9457
+errors, health probes, graceful shutdown, JSON logs and metrics
+([plan](.specs/features/app-hardening/plan.md)).
+
+```mermaid
+flowchart LR
+    client["client"] --> nlb["load balancer"]
+    subgraph cluster["Kubernetes, 3 zones"]
+        nlb --> envoy["Envoy Gateway<br/>2-3 proxies"]
+        envoy -->|"/posts only"| svc["Service"]
+        svc --> a["API pod<br/>zone a"]
+        svc --> b["API pod<br/>zone b"]
+        svc --> c["API pod<br/>zone c"]
+        job["migrations Job<br/>per release"]
+    end
+    a & b & c --> db[("MySQL 8.4<br/>primary + 2 replicas<br/>one per zone")]
+    job --> db
+```
+
+Each feature was specified, built and verified with the `tlc-spec-lean` workflow: a plan with
+acceptance criteria, checks with proofs, the build, then an independent verifier with mutation
+testing. The artefacts are under [.specs/features/](.specs/features/).
+
+## Repository layout
+
+| Path                                        | Contents                                                                                |
+| ------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `src/`                                      | the API (Express 5, TypeORM, MySQL)                                                     |
+| `tests/`                                    | `unit`, `integration`, `image`, `chart`, `ci`, `e2e` suites (Vitest) and `k6` scenarios |
+| `Dockerfile`, `scripts/image.sh`            | the container image                                                                     |
+| `deploy/helm/posts-api`                     | the Helm chart                                                                          |
+| `deploy/terraform/local`, `deploy/local`    | the local environment and its values                                                    |
+| `deploy/terraform/aws`, `deploy/production` | the AWS environment and its values                                                      |
+| `.github/`                                  | CI, releases and Dependabot                                                             |
+| `docs/adr/`, `.specs/`                      | decisions, plans, checks and verification reports                                       |
+
 ## Requirements
 
 - Node.js 24 LTS (Yarn 4 is pinned in `package.json` and provided by Corepack)
@@ -209,3 +262,8 @@ These three are meant for the orchestrator and the scraper, not for the public r
   product decision still to be made; until then the API must not be exposed without a gateway
   that authenticates callers.
 - `POST /posts` is not idempotent: a client retry after a timeout can create a duplicate post.
+- On the local cluster, a MySQL member whose node was hard-stopped may not rejoin the group by
+  itself; deleting its pod lets the operator rejoin it (the zone-outage scenario does so). RDS
+  handles member recovery in production.
+- Node autoscaling (Karpenter or Cluster Autoscaler) is not configured on AWS: the node group holds
+  3-9 nodes and is sized for the HPA's maximum of 10 API replicas.
