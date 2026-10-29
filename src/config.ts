@@ -24,6 +24,7 @@ const schema = z.object({
   DB_NAME: z.string().min(1),
   DB_SSL: booleanFlag.default(false),
   DB_POOL_MAX: decimal(1, 1000).default(10),
+  DB_QUERY_TIMEOUT_MS: decimal(100, 600_000).default(5000),
 });
 
 export interface DatabaseConfig {
@@ -34,6 +35,8 @@ export interface DatabaseConfig {
   name: string;
   ssl: boolean;
   poolMax: number;
+  /** A query still unanswered after this long fails and its connection is discarded. */
+  queryTimeoutMs: number;
 }
 
 export interface Config {
@@ -77,6 +80,7 @@ export function loadConfig(env: NodeJS.ProcessEnv): Config {
       name: c.DB_NAME,
       ssl: c.DB_SSL,
       poolMax: c.DB_POOL_MAX,
+      queryTimeoutMs: c.DB_QUERY_TIMEOUT_MS,
     },
   };
 }

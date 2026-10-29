@@ -4,7 +4,7 @@ import type { Express } from "express";
 import type { DataSource } from "typeorm";
 import { createApp } from "./app";
 import { ConfigError, loadConfig, type Config } from "./config";
-import { createDataSource } from "./database";
+import { createDataSource, initializeDataSource } from "./database";
 import { createLogger, type Logger } from "./logger";
 
 /** Longer than the 60 s idle timeout of common load balancers, so they close first. */
@@ -53,7 +53,7 @@ export async function start({
   signals = process,
   dataSource = createDataSource(config.db),
 }: StartOptions): Promise<Running> {
-  await dataSource.initialize();
+  await initializeDataSource(dataSource);
 
   let draining = false;
   const app = createApp({ dataSource, logger, isDraining: () => draining });

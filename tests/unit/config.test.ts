@@ -27,6 +27,7 @@ describe("config", () => {
         name: "posts",
         ssl: false,
         poolMax: 10,
+        queryTimeoutMs: 5000,
       },
     });
   });
@@ -40,6 +41,7 @@ describe("config", () => {
       DB_PORT: "3307",
       DB_SSL: "true",
       DB_POOL_MAX: "20",
+      DB_QUERY_TIMEOUT_MS: "2000",
     });
     expect(config).toEqual({
       port: 8080,
@@ -53,6 +55,7 @@ describe("config", () => {
         name: "posts",
         ssl: true,
         poolMax: 20,
+        queryTimeoutMs: 2000,
       },
     });
   });
@@ -89,6 +92,8 @@ describe("config", () => {
     ["SHUTDOWN_TIMEOUT_MS", "2147483648"],
     ["SHUTDOWN_TIMEOUT_MS", "0"],
     ["DB_POOL_MAX", "1001"],
+    ["DB_QUERY_TIMEOUT_MS", "99"],
+    ["DB_QUERY_TIMEOUT_MS", "600001"],
     ["DB_SSL", "yes"],
     ["DB_POOL_MAX", "0"],
     ["SHUTDOWN_TIMEOUT_MS", "-1"],

@@ -10,6 +10,7 @@ const db: DatabaseConfig = {
   name: "posts",
   ssl: false,
   poolMax: 10,
+  queryTimeoutMs: 5000,
 };
 
 describe("database options", () => {
@@ -20,6 +21,13 @@ describe("database options", () => {
 
   it("tls is off when DB_SSL is false", () => {
     expect(dataSourceOptions(db)).toMatchObject({ ssl: undefined });
+  });
+
+  it("query timeout bounds every query at the configured time", () => {
+    expect(dataSourceOptions({ ...db, queryTimeoutMs: 1234 })).toMatchObject({
+      enableQueryTimeout: true,
+      maxQueryExecutionTime: 1234,
+    });
   });
 
   it("never lets the ORM change the schema", () => {

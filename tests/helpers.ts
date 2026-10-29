@@ -29,7 +29,16 @@ export async function createTestDatabase(): Promise<DatabaseConfig> {
     await connection.end();
   }
   const { host, port, rootPassword } = server();
-  return { host, port, user: "root", password: rootPassword, name, ssl: false, poolMax: 5 };
+  return {
+    host,
+    port,
+    user: "root",
+    password: rootPassword,
+    name,
+    ssl: false,
+    poolMax: 5,
+    queryTimeoutMs: 5000,
+  };
 }
 
 export async function query<T = Record<string, unknown>>(
