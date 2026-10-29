@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { HttpError } from "./errors";
 
-/** Largest value of a PostgreSQL `integer`, the type of every id (plan door 1). */
+/** Largest value of a MySQL signed `int`, the type of every id (plan door 1). */
 export const MAX_ID = 2_147_483_647;
 export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 100;
