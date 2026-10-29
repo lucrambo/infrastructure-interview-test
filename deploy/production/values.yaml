@@ -1,0 +1,41 @@
+# Production values for the chart on the AWS environment (deploy/terraform/aws). The release
+# pipeline adds the database host (output database_host) and the image digest it published:
+#
+#   helm upgrade --install posts deploy/helm/posts-api --namespace posts \
+#     --values deploy/production/values.yaml \
+#     --set database.host="$(terraform -chdir=deploy/terraform/aws output -raw database_host)" \
+#     --set image.digest=sha256:<digest of the release> --wait
+
+image:
+  repository: docker.io/lrambo/posts-api
+  # set per release; a digest makes the deployed bytes exactly the signed ones
+  digest: sha256:70c5e12fe58e2f226ccf03453d06515d2cedc29e1e087a93402dc9572ea04de0
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+
+database:
+  host: ""
+  ssl: true
+  # synced from AWS Secrets Manager by External Secrets
+  existingSecret: posts-db
+  password: ""
+
+httpRoute:
+  parentRefs:
+    - name: public
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - api.posts.example.com
+
+rateLimit:
+  enabled: true
+  requests: 200
+  unit: Second
+
+networkPolicy:
+  gatewayNamespace: envoy-gateway-system
+  monitoringNamespace: monitoring
