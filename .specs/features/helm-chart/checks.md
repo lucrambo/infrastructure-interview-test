@@ -4,7 +4,7 @@ Mutations: 3
 Build: `yarn typecheck`; `yarn lint`; `helm lint --strict deploy/helm/posts-api --set database.host=db --set database.password=x`
 Plan: `.specs/features/helm-chart/plan.md`
 
-21 checks in 5 slices · 4 one-way doors · 0 open, of which 0 block
+24 checks in 5 slices · 4 one-way doors · 0 open, of which 0 block
 
 ## Checks
 
@@ -39,7 +39,7 @@ Proof: `yarn vitest run tests/chart/availability.test.ts -t "resources"`
 **C9** - Pod and container security contexts match AC 9 on the `Deployment` (AC 9)
 Proof: `yarn vitest run tests/chart/security.test.ts -t "security context"`
 
-**C10** - The chart's `ServiceAccount` has `automountServiceAccountToken: false` and is used by the `Deployment` and the `Job` (AC 10)
+**C10** - The `Deployment` and the migrations `Job` each run under a chart `ServiceAccount` with `automountServiceAccountToken: false` - the Job under its hook copy (AC 10; amended after Verifier finding 5)
 Proof: `yarn vitest run tests/chart/security.test.ts -t "service account"`
 
 **C11** - The `NetworkPolicy` admits ingress on 3000 only from the gateway and monitoring namespaces and egress only to DNS 53 UDP/TCP and the database port (AC 11)
@@ -67,7 +67,7 @@ Proof: `yarn vitest run tests/chart/exposure.test.ts -t "rate limit"`
 
 ### S4 - Migrations once per release
 
-**C18** - The migrations `Job` has the door 3 hook annotations, limits and arguments, and the Deployment's image, service account, security context, `ConfigMap` and secret (AC 18)
+**C18** - The migrations `Job` has the door 3 hook annotations, limits and arguments, the Deployment's image and security context, and hook copies of its configuration and secret (AC 18; amended after Verifier finding 5)
 Proof: `yarn vitest run tests/chart/migrations.test.ts -t "migrations job"`
 
 ### S5 - Correct by construction
@@ -80,6 +80,15 @@ Proof: `yarn vitest run tests/chart/validity.test.ts -t "schema rejects"`
 
 **C21** - `checksum/config` changes when a `ConfigMap` value changes and when the password changes, and not otherwise (AC 21)
 Proof: `yarn vitest run tests/chart/validity.test.ts -t "checksum"`
+
+**C22** - The release's `ConfigMap`, `Secret` and `ServiceAccount` are tracked resources (no `helm.sh/hook`), and the Job's copies carry the same data as hooks deleted once every hook succeeded (door 4; appended after Verifier finding 5)
+Proof: `yarn vitest run tests/chart/migrations.test.ts -t "hook copies"`
+
+**C23** - The Service, PDB, Deployment and spread selectors match the API pods and not the migrations Job's pods, while the NetworkPolicy covers both (AC 1, AC 4; appended after Verifier finding 4)
+Proof: `yarn vitest run tests/chart/migrations.test.ts -t "not selected"`
+
+**C24** - Rendering fails when `maxReplicas < minReplicas` or when `preStopSleepSeconds` plus the drain does not fit the grace period, and accepts one second of margin (AC 7; appended after Verifier finding 6)
+Proof: `yarn vitest run tests/chart/validity.test.ts -t "guards"`
 
 ## Coverage
 
@@ -114,7 +123,7 @@ Proof: `yarn vitest run tests/chart/validity.test.ts -t "checksum"`
 
 ## Handoff
 
-- **Settled mid-build:** none
-- **Dispatched:** Verifier (independent sub-agent, isolated worktree) at `HEAD` after `docs(specs): record helm-chart proofs`, round 1
+- **Settled mid-build:** none from the user; after the Verifier, the configuration objects stopped being hooks and the Job got hook copies (findings 4-6), so C10 and C18 were reworded and C22-C24 appended
+- **Dispatched:** Verifier (independent sub-agent, isolated worktree) at `HEAD` after `docs(specs): record helm-chart proofs`, round 1, returned: FAIL, 6 findings
 - **Boundary:** C1-C21 closed at `76b0bdc` - `yarn test:chart` 27 tests green
 - **Abandoned:** none
