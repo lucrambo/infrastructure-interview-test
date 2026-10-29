@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: database-init
+type: Opaque
+stringData:
+  root-password: {{ .Values.rootPassword | quote }}
+  app-password: {{ .Values.password | quote }}
+---
+# Waits until the InnoDB Cluster accepts connections through the Router, then creates the
+# application database and its user. Every statement is idempotent. As a hook it is recreated,
+# and waited for, on every install and upgrade.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: database-init
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 60
+  activeDeadlineSeconds: 1200
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: init
+          image: {{ .Values.image }}
+          env:
+            - name: MYSQL_PWD
+              valueFrom:
+                secretKeyRef:
+                  name: database-init
+                  key: root-password
+            - name: APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-init
+                  key: app-password
+          command:
+            - bash
+            - -ec
+            - |
+              until mysql --host={{ .Values.host }} --user=root --connect-timeout=5 -e "SELECT 1" >/dev/null 2>&1; do
+                echo "waiting for {{ .Values.host }}"
+                sleep 5
+              done
+              mysql --host={{ .Values.host }} --user=root --connect-timeout=10 <<SQL
+              CREATE DATABASE IF NOT EXISTS \`{{ .Values.database }}\`;
+              CREATE USER IF NOT EXISTS '{{ .Values.user }}'@'%' IDENTIFIED BY '${APP_PASSWORD}';
+              ALTER USER '{{ .Values.user }}'@'%' IDENTIFIED BY '${APP_PASSWORD}';
+              GRANT ALL PRIVILEGES ON \`{{ .Values.database }}\`.* TO '{{ .Values.user }}'@'%';
+              SQL

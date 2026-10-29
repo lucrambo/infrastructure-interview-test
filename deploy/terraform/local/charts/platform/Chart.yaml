@@ -1,0 +1,5 @@
+apiVersion: v2
+name: platform
+description: Gateway API objects of the local environment (GatewayClass, EnvoyProxy, Gateway).
+type: application
+version: 0.1.0
