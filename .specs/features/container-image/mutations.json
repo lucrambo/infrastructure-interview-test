@@ -1,0 +1,23 @@
+[
+  {
+    "file": "scripts/image.sh",
+    "old": "PLATFORMS=\"linux/amd64,linux/arm64\"",
+    "new": "PLATFORMS=\"linux/amd64\"",
+    "proof": "yarn vitest run tests/image/registry.test.ts -t \"published index\"",
+    "label": "push builds linux/amd64 only (arm64 dropped)"
+  },
+  {
+    "file": "scripts/image.sh",
+    "old": "--severity HIGH,CRITICAL",
+    "new": "--severity CRITICAL",
+    "proof": "yarn vitest run tests/image/scripts.test.ts -t \"scan fails\"",
+    "label": "scan ignores HIGH vulnerabilities"
+  },
+  {
+    "file": "Dockerfile",
+    "old": "yarn build && yarn workspaces focus --production",
+    "new": "yarn build",
+    "proof": "yarn vitest run tests/image/contents.test.ts -t \"production files only\"",
+    "label": "runtime image ships dev dependencies (no production focus)"
+  }
+]

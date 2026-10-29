@@ -4,7 +4,7 @@ Mutations: 3
 Build: `yarn build`; `yarn typecheck`; `yarn lint`
 Plan: `.specs/features/container-image/plan.md`
 
-16 checks in 2 slices · 4 one-way doors · 0 open, of which 0 block
+17 checks in 2 slices · 4 one-way doors · 0 open, of which 0 block
 
 ## Checks
 
@@ -60,6 +60,9 @@ Proof: `yarn vitest run tests/image/registry.test.ts -t "anonymous"`
 **C16** - Every `FROM` in `Dockerfile` names an image by `@sha256:` digest (AC 16)
 Proof: `yarn vitest run tests/image/contents.test.ts -t "digest"`
 
+**C17** - `scripts/image.sh push` against a throwaway local registry pushes `<version>` and `sha-<7 chars of HEAD>` to one index with `linux/amd64`, `linux/arm64`, two attestation manifests, an SBOM, provenance and the HEAD revision label (AC 12; appended after the Verifier found the push build untested)
+Proof: `yarn vitest run tests/image/scripts.test.ts -t "push builds"`
+
 ## Coverage
 
 | Set (size) | Member -> proof | Unproven |
@@ -67,8 +70,8 @@ Proof: `yarn vitest run tests/image/contents.test.ts -t "digest"`
 | absent paths, AC 6 (7) | `src/` C6 · `tests/` C6 · `.git` C6 · `.env` C6 · `typescript` C6 · `vitest` C6 · `eslint` C6 | - |
 | shells, AC 4 (2) | `/bin/sh` C4 · `/bin/bash` C4 | - |
 | OCI labels, AC 8 (5) | `source` C8 · `revision` C8 · `version` C8 · `licenses` C8 · `title` C8 | - |
-| platforms, door 4 (2) | `linux/amd64` C12 · `linux/arm64` C12 | - |
-| tags, door 1 (2) | `<version>` C12 C14 C15 · `sha-<commit>` C12 | - |
+| platforms, door 4 (2) | `linux/amd64` C12 C17 · `linux/arm64` C12 C17 | - |
+| tags, door 1 (2) | `<version>` C12 C14 C15 C17 · `sha-<commit>` C12 C17 | - |
 | scan failure causes, AC 11 (2) | Trivy finding C11 · Hadolint warning C11 | - |
 | `scripts/image.sh push` refusals (2) | dirty tree C13 · existing version C14 | - |
 | container contract, door 3 (5) | server command C1 · migrations args C2 · port 3000 C1 · uid/gid 65532 C3 · nothing written C5 | - |
@@ -90,6 +93,6 @@ Proof: `yarn vitest run tests/image/contents.test.ts -t "digest"`
 ## Handoff
 
 - **Settled mid-build:** 2026-10-29 - first publish of `0.1.0` and `sha-186d9b3` authorized - user chose "Sim, publicar agora"
-- **Dispatched:** Verifier (independent sub-agent, isolated worktree) at `HEAD` after `docs(specs): record container-image proofs at HEAD`, round 1
-- **Boundary:** C1-C16 closed at `186d9b3`; image published as `docker.io/lrambo/posts-api@sha256:70c5e12fe58e2f226ccf03453d06515d2cedc29e1e087a93402dc9572ea04de0`
+- **Dispatched:** Verifier (independent sub-agent, isolated worktree) at `HEAD` after `docs(specs): record container-image proofs at HEAD`, round 1 - returned: FAIL, 4 findings
+- **Boundary:** C1-C16 closed at `186d9b3`; C17 and the Verifier findings closed in `49f496c`..`e6f96d2`; image published as `docker.io/lrambo/posts-api@sha256:70c5e12fe58e2f226ccf03453d06515d2cedc29e1e087a93402dc9572ea04de0`
 - **Abandoned:** none - `scripts/image.sh` landed in the Dockerfile commit `6a36bb5` because `git update-index --chmod` had already staged it
