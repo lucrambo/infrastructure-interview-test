@@ -23,16 +23,16 @@ Proof: `terraform -chdir=deploy/terraform/aws test`
 ### S2 - Highly available across 3 zones
 
 **C4** - The mocked apply has 3 private, 3 public and 3 database subnets and 3 NAT gateways (AC 4)
-Proof: `terraform -chdir=deploy/terraform/aws test -run=environment`
+Proof: `terraform -chdir=deploy/terraform/aws test -filter=tests/environment.tftest.hcl -verbose`
 
 **C5** - The node group is `AL2023_ARM_64_STANDARD` on Graviton, spans the private subnets with 3-9 nodes, and EKS secrets use KMS (AC 5)
 Proof: `yarn vitest run tests/ci/aws.test.ts -t "node group"`
 
 **C6** - The RDS cluster is MySQL 8.4 Multi-AZ (`db.m6gd.large`, `io2`), encrypted, deletion-protected, 14-day backups, master password managed, TLS required, and MySQL reachable only from the node security group (AC 6)
-Proof: `terraform -chdir=deploy/terraform/aws test -run=environment`
+Proof: `terraform -chdir=deploy/terraform/aws test -filter=tests/environment.tftest.hcl -verbose`
 
 **C7** - The AWS Load Balancer Controller, Envoy Gateway, metrics-server and External Secrets are pinned, and the NLB terminates TLS with `var.certificate_arn` (AC 7)
-Proof: `terraform -chdir=deploy/terraform/aws test -run=environment`
+Proof: `terraform -chdir=deploy/terraform/aws test -filter=tests/environment.tftest.hcl -verbose`
 Proof: `yarn vitest run tests/ci/aws.test.ts -t "load balancer"`
 
 ### S3 - The chart's production values
@@ -64,7 +64,7 @@ Proof: `yarn vitest run tests/chart/production.test.ts -t "production values"`
 
 ## Handoff
 
-- **Settled mid-build:** none
+- **Settled mid-build:** none from the user; the proofs of C4, C6, C7 used `terraform test -run`, which does not exist, and now use `-filter` on the same test file
 - **Dispatched:** none
 - **Boundary:** none closed yet
 - **Abandoned:** none
