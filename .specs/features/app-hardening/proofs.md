@@ -1,12 +1,12 @@
 # app-hardening proofs
 
-**HEAD**: b52ba61
+**HEAD**: 77291c1
 **Tree**: clean
-**Result**: 43 pass, 0 fail; mutations 0 killed, 0 not
+**Result**: 43 pass, 0 fail; mutations 3 killed, 0 not
 
 | Check | Proof | Ran | Passed | Result |
 | --- | --- | --- | --- | --- |
-| C1 | `yarn vitest run tests/unit/config.test.ts -t "config"` | 15 | 15 | pass |
+| C1 | `yarn vitest run tests/unit/config.test.ts -t "config"` | 23 | 23 | pass |
 | C2 | `yarn vitest run tests/integration/boot.test.ts -t "invalid configuration"` | 4 | 4 | pass |
 | C3 | `yarn vitest run tests/integration/boot.test.ts -t "unreachable database"` | 2 | 2 | pass |
 | C4 | `yarn vitest run tests/unit/database.test.ts -t "tls"` | 2 | 2 | pass |
@@ -21,7 +21,7 @@
 | C11 | `yarn vitest run tests/integration/posts.test.ts -t "POST /posts validation"` | 14 | 14 | pass |
 | C12 | `yarn vitest run tests/integration/posts.test.ts -t "body over 100 kB"` | 1 | 1 | pass |
 | C13 | `yarn vitest run tests/integration/posts.test.ts -t "unsupported media type"` | 1 | 1 | pass |
-| C14 | `yarn vitest run tests/integration/posts.test.ts -t "GET /posts pagination"` | 5 | 5 | pass |
+| C14 | `yarn vitest run tests/integration/posts.test.ts -t "GET /posts pagination"` | 7 | 7 | pass |
 | C15 | `yarn vitest run tests/integration/posts.test.ts -t "GET /posts rejects"` | 8 | 8 | pass |
 | C16 | `yarn vitest run tests/integration/posts.test.ts -t "GET /posts/:id returns"` | 1 | 1 | pass |
 | C17 | `yarn vitest run tests/integration/posts.test.ts -t "GET /posts/:id absent"` | 1 | 1 | pass |
@@ -33,7 +33,7 @@
 | C23 | `yarn vitest run tests/integration/health.test.ts -t "healthz"` | 2 | 2 | pass |
 | C24 | `yarn vitest run tests/integration/health.test.ts -t "readyz ready"` | 1 | 1 | pass |
 | C25 | `yarn vitest run tests/integration/health.test.ts -t "readyz not ready"` | 3 | 3 | pass |
-| C26 | `yarn vitest run tests/integration/lifecycle.test.ts -t "drains"` | 2 | 2 | pass |
+| C26 | `yarn vitest run tests/integration/lifecycle.test.ts -t "drains"` | 4 | 4 | pass |
 | C27 | `yarn vitest run tests/integration/lifecycle.test.ts -t "shutdown timeout"` | 1 | 1 | pass |
 | C28 | `yarn vitest run tests/unit/server.test.ts -t "timeouts"` | 1 | 1 | pass |
 | C29 | `yarn vitest run tests/integration/observability.test.ts -t "access log"` | 3 | 3 | pass |
@@ -49,3 +49,11 @@
 | Build | `yarn build` | - | - | pass |
 | Build | `yarn typecheck` | - | - | pass |
 | Build | `yarn lint` | - | - | pass |
+
+## Mutations
+
+| Mutation | Location | Killed |
+| --- | --- | --- |
+| readiness timeout 1000 ms -> 1900 ms | `src\app.ts:10` | yes |
+| keyset cursor id > after -> id >= after | `src\controller\PostGetAllAction.ts:20` | yes |
+| second shutdown signal while draining is no longer ignored | `src\server.ts:72` | yes |
