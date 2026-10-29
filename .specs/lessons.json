@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 11,
+  "next_id": 17,
   "lessons": [
     {
       "id": "L-001",
@@ -184,6 +184,114 @@
       ],
       "created": "2026-10-29T06:23:22Z",
       "last_seen": "2026-10-29T06:23:22Z"
+    },
+    {
+      "id": "L-011",
+      "key": "surviving_mutant::test a minimum bound with the value just below it and the value at it not only with a far off value",
+      "text": "Test a minimum bound with the value just below it and the value at it, not only with a far-off value",
+      "signal": "surviving_mutant",
+      "scope": "chart",
+      "status": "candidate",
+      "features": [
+        "helm-chart"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 1; values.schema.json (chart)"
+      ],
+      "created": "2026-10-29T06:33:39Z",
+      "last_seen": "2026-10-29T06:33:39Z"
+    },
+    {
+      "id": "L-012",
+      "key": "surviving_mutant::render optional sources that combine together in one case and assert the merged result",
+      "text": "Render optional sources that combine together in one case and assert the merged result",
+      "signal": "surviving_mutant",
+      "scope": "chart",
+      "status": "candidate",
+      "features": [
+        "helm-chart"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 2; templates/_helpers.tpl (chart)"
+      ],
+      "created": "2026-10-29T06:33:39Z",
+      "last_seen": "2026-10-29T06:33:39Z"
+    },
+    {
+      "id": "L-013",
+      "key": "surviving_mutant::test each condition of a compound template guard on its own",
+      "text": "Test each condition of a compound template guard on its own",
+      "signal": "surviving_mutant",
+      "scope": "chart",
+      "status": "candidate",
+      "features": [
+        "helm-chart"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 3; templates/ratelimit.yaml (chart)"
+      ],
+      "created": "2026-10-29T06:33:39Z",
+      "last_seen": "2026-10-29T06:33:39Z"
+    },
+    {
+      "id": "L-014",
+      "key": "ac_gap::give long running workloads a component label in every selector so hook jobs of the same release are never selected",
+      "text": "Give long-running workloads a component label in every selector so hook Jobs of the same release are never selected",
+      "signal": "ac_gap",
+      "scope": "chart",
+      "status": "candidate",
+      "features": [
+        "helm-chart"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 4; templates/deployment.yaml (chart)"
+      ],
+      "created": "2026-10-29T06:33:40Z",
+      "last_seen": "2026-10-29T06:33:40Z"
+    },
+    {
+      "id": "L-015",
+      "key": "ac_gap::keep release configuration as tracked resources give pre install hook jobs their own hook scoped copies",
+      "text": "Keep release configuration as tracked resources; give pre-install hook Jobs their own hook-scoped copies",
+      "signal": "ac_gap",
+      "scope": "chart",
+      "status": "candidate",
+      "features": [
+        "helm-chart"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 5; templates/_helpers.tpl (chart)"
+      ],
+      "created": "2026-10-29T06:33:40Z",
+      "last_seen": "2026-10-29T06:33:40Z"
+    },
+    {
+      "id": "L-016",
+      "key": "ac_gap::fail the render when values that must agree with each other contradict not only when a single value is out of range",
+      "text": "Fail the render when values that must agree with each other contradict, not only when a single value is out of range",
+      "signal": "ac_gap",
+      "scope": "chart",
+      "status": "candidate",
+      "features": [
+        "helm-chart"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 6; templates/_helpers.tpl (chart)"
+      ],
+      "created": "2026-10-29T06:33:40Z",
+      "last_seen": "2026-10-29T06:33:40Z"
     }
   ]
 }

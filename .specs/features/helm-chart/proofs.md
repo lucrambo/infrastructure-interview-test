@@ -1,8 +1,8 @@
 # helm-chart proofs
 
-**HEAD**: 76b0bdc
+**HEAD**: b6525a0
 **Tree**: clean
-**Result**: 24 pass, 0 fail; mutations 0 killed, 0 not
+**Result**: 27 pass, 0 fail; mutations 3 killed, 0 not
 
 | Check | Proof | Ran | Passed | Result |
 | --- | --- | --- | --- | --- |
@@ -23,10 +23,21 @@
 | C15 | `yarn vitest run tests/chart/exposure.test.ts -t "service"` | 2 | 2 | pass |
 | C16 | `yarn vitest run tests/chart/exposure.test.ts -t "http route"` | 1 | 1 | pass |
 | C17 | `yarn vitest run tests/chart/exposure.test.ts -t "rate limit"` | 1 | 1 | pass |
-| C18 | `yarn vitest run tests/chart/migrations.test.ts -t "migrations job"` | 1 | 1 | pass |
+| C18 | `yarn vitest run tests/chart/migrations.test.ts -t "migrations job"` | 3 | 3 | pass |
 | C19 | `yarn vitest run tests/chart/validity.test.ts -t "valid manifests"` | 2 | 2 | pass |
-| C20 | `yarn vitest run tests/chart/validity.test.ts -t "schema rejects"` | 4 | 4 | pass |
+| C20 | `yarn vitest run tests/chart/validity.test.ts -t "schema rejects"` | 5 | 5 | pass |
 | C21 | `yarn vitest run tests/chart/validity.test.ts -t "checksum"` | 1 | 1 | pass |
+| C22 | `yarn vitest run tests/chart/migrations.test.ts -t "hook copies"` | 1 | 1 | pass |
+| C23 | `yarn vitest run tests/chart/migrations.test.ts -t "not selected"` | 1 | 1 | pass |
+| C24 | `yarn vitest run tests/chart/validity.test.ts -t "guards"` | 3 | 3 | pass |
 | Build | `yarn typecheck` | - | - | pass |
 | Build | `yarn lint` | - | - | pass |
 | Build | `helm lint --strict deploy/helm/posts-api --set database.host=db --set database.password=x` | - | - | pass |
+
+## Mutations
+
+| Mutation | Location | Killed |
+| --- | --- | --- |
+| schema accepts autoscaling.minReplicas 2 (zone-redundancy bound shifted by one) | `deploy\helm\posts-api\values.schema.json:47` | yes |
+| imageCredentials replaces the listed imagePullSecrets instead of adding to them | `deploy\helm\posts-api\templates\_helpers.tpl:112` | yes |
+| rate limit policy renders without its HTTPRoute (dangling targetRef) | `deploy\helm\posts-api\templates\ratelimit.yaml:1` | yes |

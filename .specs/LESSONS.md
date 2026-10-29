@@ -74,6 +74,42 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: verification.md finding 4; tests/image/registry.test.ts (release)
 - last seen: 2026-10-29T06:23:22Z
 
+### L-011 - Test a minimum bound with the value just below it and the value at it, not only with a far-off value
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `chart` · harmful: 0
+- features: helm-chart
+- evidence: verification.md finding 1; values.schema.json (chart)
+- last seen: 2026-10-29T06:33:39Z
+
+### L-012 - Render optional sources that combine together in one case and assert the merged result
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `chart` · harmful: 0
+- features: helm-chart
+- evidence: verification.md finding 2; templates/_helpers.tpl (chart)
+- last seen: 2026-10-29T06:33:39Z
+
+### L-013 - Test each condition of a compound template guard on its own
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `chart` · harmful: 0
+- features: helm-chart
+- evidence: verification.md finding 3; templates/ratelimit.yaml (chart)
+- last seen: 2026-10-29T06:33:39Z
+
+### L-014 - Give long-running workloads a component label in every selector so hook Jobs of the same release are never selected
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `chart` · harmful: 0
+- features: helm-chart
+- evidence: verification.md finding 4; templates/deployment.yaml (chart)
+- last seen: 2026-10-29T06:33:40Z
+
+### L-015 - Keep release configuration as tracked resources; give pre-install hook Jobs their own hook-scoped copies
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `chart` · harmful: 0
+- features: helm-chart
+- evidence: verification.md finding 5; templates/_helpers.tpl (chart)
+- last seen: 2026-10-29T06:33:40Z
+
+### L-016 - Fail the render when values that must agree with each other contradict, not only when a single value is out of range
+- signal: `ac_gap` · recurrence: 1 feature(s) · scope: `chart` · harmful: 0
+- features: helm-chart
+- evidence: verification.md finding 6; templates/_helpers.tpl (chart)
+- last seen: 2026-10-29T06:33:40Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.
