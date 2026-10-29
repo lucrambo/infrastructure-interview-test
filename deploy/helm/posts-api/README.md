@@ -39,6 +39,7 @@ inside `terminationGracePeriodSeconds` (35).
 | `autoscaling.minReplicas` / `maxReplicas`                | `3` / `10`                            | the schema refuses fewer than 3                                                     |
 | `database.host`                                          | required                              | MySQL host                                                                          |
 | `database.port`, `.name`, `.user`                        | `3306`, `posts`, `posts`              | connection settings                                                                 |
+| `database.queryTimeoutMs`                                | `5000`                                | query timeout; a connection that times out is replaced                              |
 | `database.ssl`                                           | `false`                               | verified TLS to the database (set `true` for RDS)                                   |
 | `database.password` / `database.existingSecret`          | one is required                       | password, or the name of a Secret holding it under `existingSecretKey` (`password`) |
 | `httpRoute.parentRefs`                                   | `public` in `gateway`                 | the Gateway to attach to                                                            |

@@ -77,6 +77,7 @@
         "user": { "type": "string", "minLength": 1 },
         "ssl": { "type": "boolean" },
         "poolMax": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "queryTimeoutMs": { "type": "integer", "minimum": 100, "maximum": 600000 },
         "password": { "type": "string" },
         "existingSecret": { "type": "string" },
         "existingSecretKey": { "type": "string", "minLength": 1 }

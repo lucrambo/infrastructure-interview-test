@@ -53,6 +53,8 @@ database:
   user: posts
   ssl: false
   poolMax: 10
+  # a query unanswered after this long fails and its connection is replaced (failover, zone loss)
+  queryTimeoutMs: 5000
   # Either `password` (the chart creates a Secret) or `existingSecret` (for example created by
   # External Secrets from AWS Secrets Manager) must be set.
   password: ""

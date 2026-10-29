@@ -87,6 +87,7 @@ DB_USER: {{ .Values.database.user | quote }}
 DB_NAME: {{ .Values.database.name | quote }}
 DB_SSL: {{ .Values.database.ssl | quote }}
 DB_POOL_MAX: {{ .Values.database.poolMax | quote }}
+DB_QUERY_TIMEOUT_MS: {{ .Values.database.queryTimeoutMs | quote }}
 {{- end -}}
 
 {{/* Shared by the Deployment and the migrations Job. */}}
