@@ -168,6 +168,6 @@ Proof: `yarn vitest run tests/unit/package.test.ts -t "metadata"`
 ## Handoff
 
 - **Settled mid-build:** 2026-10-29 - door 4 amended to TypeORM 1.1.x instead of 0.3 (0.3 is tagged `legacy` upstream) - user chose "TypeORM 1.1.x (Recommended)"; 2026-10-29 - database engine is MySQL 8.4 with `mysql2` (AD-001, ADR-001) - user: "quero que você utilize na verdade o mysql, mantendo a tecnologia que já é do projeto"
-- **Dispatched:** none
+- **Dispatched:** Verifier (independent sub-agent) at `HEAD` after `docs(specs): record app-hardening proofs`, round 1
 - **Boundary:** C1-C36 closed at `c235426` - `yarn test` 12 files, 97 tests green; typecheck, lint, build and audit green
 - **Abandoned:** `unplugin-swc` for decorator metadata in Vitest - the SWC native binding refuses to load on this machine (cache directory ACL check), so entities declare explicit column types instead; `pino-http` - replaced by a small access-log middleware that writes only the agreed fields, so no header can be logged by default
