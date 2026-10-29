@@ -115,6 +115,6 @@ Proof: `yarn vitest run tests/chart/validity.test.ts -t "checksum"`
 ## Handoff
 
 - **Settled mid-build:** none
-- **Dispatched:** none
-- **Boundary:** none closed yet
+- **Dispatched:** Verifier (independent sub-agent, isolated worktree) at `HEAD` after `docs(specs): record helm-chart proofs`, round 1
+- **Boundary:** C1-C21 closed at `76b0bdc` - `yarn test:chart` 27 tests green
 - **Abandoned:** none
