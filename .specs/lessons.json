@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "promote_threshold": 2,
+  "window_days": 45,
+  "quarantine_threshold": 2,
+  "next_id": 7,
+  "lessons": [
+    {
+      "id": "L-001",
+      "key": "ac_gap::test pagination with several rows per joined relation ordering by a joined column makes take limit count joined rows instead of parent entities",
+      "text": "Test pagination with several rows per joined relation; ordering by a joined column makes take/limit count joined rows instead of parent entities",
+      "signal": "ac_gap",
+      "scope": "pagination",
+      "status": "candidate",
+      "features": [
+        "app-hardening"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 1; src/controller/PostGetAllAction.ts (pagination)"
+      ],
+      "created": "2026-10-29T05:21:27Z",
+      "last_seen": "2026-10-29T05:21:27Z"
+    },
+    {
+      "id": "L-002",
+      "key": "surviving_mutant::bound a timing assertion close to the value the criterion fixes not at double it",
+      "text": "Bound a timing assertion close to the value the criterion fixes, not at double it",
+      "signal": "surviving_mutant",
+      "scope": "timeouts",
+      "status": "candidate",
+      "features": [
+        "app-hardening"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 2; tests/integration/health.test.ts (timeouts)"
+      ],
+      "created": "2026-10-29T05:21:27Z",
+      "last_seen": "2026-10-29T05:21:27Z"
+    },
+    {
+      "id": "L-003",
+      "key": "surviving_mutant::send shutdown signals twice in lifecycle tests register handlers with on not once so a repeated signal cannot reach the default handler",
+      "text": "Send shutdown signals twice in lifecycle tests; register handlers with on, not once, so a repeated signal cannot reach the default handler",
+      "signal": "surviving_mutant",
+      "scope": "lifecycle",
+      "status": "candidate",
+      "features": [
+        "app-hardening"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 3; src/server.ts (lifecycle)"
+      ],
+      "created": "2026-10-29T05:21:27Z",
+      "last_seen": "2026-10-29T05:21:27Z"
+    },
+    {
+      "id": "L-004",
+      "key": "ac_gap::parse numeric environment variables as decimal digits with explicit bounds z coerce number accepts hex exponent and timer overflowing values",
+      "text": "Parse numeric environment variables as decimal digits with explicit bounds; z.coerce.number accepts hex, exponent and timer-overflowing values",
+      "signal": "ac_gap",
+      "scope": "config",
+      "status": "candidate",
+      "features": [
+        "app-hardening"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 4; src/config.ts (config)"
+      ],
+      "created": "2026-10-29T05:21:28Z",
+      "last_seen": "2026-10-29T05:21:28Z"
+    },
+    {
+      "id": "L-005",
+      "key": "spec_deviation::after changing a technology decision grep code comments and package metadata for the replaced name",
+      "text": "After changing a technology decision, grep code, comments and package metadata for the replaced name",
+      "signal": "spec_deviation",
+      "scope": "docs",
+      "status": "candidate",
+      "features": [
+        "app-hardening"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 5 (docs)"
+      ],
+      "created": "2026-10-29T05:21:28Z",
+      "last_seen": "2026-10-29T05:21:28Z"
+    },
+    {
+      "id": "L-006",
+      "key": "spec_precision_gap::run session scoped sql settings such as foreign key checks on one dedicated connection never through the pool",
+      "text": "Run session-scoped SQL settings such as FOREIGN_KEY_CHECKS on one dedicated connection, never through the pool",
+      "signal": "spec_precision_gap",
+      "scope": "tests",
+      "status": "candidate",
+      "features": [
+        "app-hardening"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "verification.md finding 6; tests/helpers.ts (tests)"
+      ],
+      "created": "2026-10-29T05:21:28Z",
+      "last_seen": "2026-10-29T05:21:28Z"
+    }
+  ]
+}
