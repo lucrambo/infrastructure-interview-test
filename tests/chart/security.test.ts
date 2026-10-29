@@ -150,7 +150,7 @@ describe("security", () => {
   });
 
   it("image reference: tag defaults to appVersion, digest wins when set", () => {
-    expect(container(find(defaults, "Deployment")).image).toBe("docker.io/lrambo/posts-api:0.1.1");
+    expect(container(find(defaults, "Deployment")).image).toBe("docker.io/lrambo/posts-api:0.1.2");
     const tagged = render({ image: { tag: "0.2.0" } });
     expect(container(find(tagged, "Deployment")).image).toBe("docker.io/lrambo/posts-api:0.2.0");
     const digest = `sha256:${"a".repeat(64)}`;
