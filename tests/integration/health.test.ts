@@ -74,7 +74,7 @@ describe("readyz not ready", () => {
     expectNotReady(await request(app).get("/readyz"));
     const elapsed = Date.now() - started;
     expect(elapsed).toBeGreaterThanOrEqual(950);
-    expect(elapsed).toBeLessThan(2000);
+    expect(elapsed).toBeLessThan(1300);
   });
 
   it("answers 503 while draining, with the database still up", async () => {
