@@ -38,6 +38,31 @@ Then `curl http://localhost:3000/posts` returns `[]`. Stop the database with
 | `yarn lint` / `yarn format`                    | ESLint and the Prettier check / rewrites formatting                          |
 | `yarn typecheck`                               | TypeScript in `strict` mode, tests included                                  |
 
+## Container image
+
+Published as [`docker.io/lrambo/posts-api`](https://hub.docker.com/r/lrambo/posts-api) for
+`linux/amd64` and `linux/arm64`, tagged `<version>` and `sha-<commit>`. Versions are immutable and
+there is no `latest` ([ADR-002](docs/adr/002-use-distroless-runtime-image.md)). The runtime is
+distroless: no shell or package manager, uid `65532`, and it writes nothing to its filesystem, so
+it runs with a read-only root filesystem.
+
+```bash
+docker run --rm -p 3000:3000   -e DB_HOST=<host> -e DB_USER=<user> -e DB_PASSWORD=<password> -e DB_NAME=<database>   docker.io/lrambo/posts-api:0.1.0
+
+# migrations, from the same image
+docker run --rm -e DB_HOST=... docker.io/lrambo/posts-api:0.1.0   node_modules/typeorm/cli.js migration:run -d dist/data-source.js
+```
+
+| Command                  | What it does                                                                                                          |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| `scripts/image.sh build` | builds `posts-api:local` for this machine                                                                             |
+| `scripts/image.sh scan`  | Hadolint on the `Dockerfile` and Trivy on the image; fails on any warning or fixable HIGH/CRITICAL vulnerability      |
+| `scripts/image.sh push`  | refuses a dirty tree or an existing version, then builds both platforms with SBOM and provenance and pushes both tags |
+| `yarn test:image`        | builds the image and tests it: contents, runtime against MySQL, the script and the published tags                     |
+
+To release, bump `version` in `package.json`, commit, run `scripts/image.sh scan`, then
+`scripts/image.sh push` while logged in to Docker Hub with push rights.
+
 ## Configuration
 
 Every setting is an environment variable; an empty value counts as unset. The process exits with
