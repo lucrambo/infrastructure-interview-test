@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
-import { container, find, render, type Any } from "./render";
+import { container, find, render } from "./render";
 
 const production = parse(readFileSync("deploy/production/values.yaml", "utf8"));
 

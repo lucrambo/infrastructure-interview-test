@@ -10,4 +10,4 @@ deploy/helm/posts-api/templates
 **/*.tfstate
 **/*.tfstate.*
 **/.kubeconfig
-deploy/terraform/local/charts/*/templates
+deploy/terraform/*/charts/*/templates
