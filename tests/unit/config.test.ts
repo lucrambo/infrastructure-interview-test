@@ -63,6 +63,16 @@ describe("config", () => {
     expect(errorOf(env).variables).toEqual([name]);
   });
 
+  it("accepts the largest shutdown timeout a timer can hold and the largest pool", () => {
+    const config = loadConfig({
+      ...required,
+      SHUTDOWN_TIMEOUT_MS: "2147483647",
+      DB_POOL_MAX: "1000",
+    });
+    expect(config.shutdownTimeoutMs).toBe(2147483647);
+    expect(config.db.poolMax).toBe(1000);
+  });
+
   it("treats an empty string as unset", () => {
     expect(loadConfig({ ...required, PORT: "" }).port).toBe(3000);
     expect(errorOf({ ...required, DB_HOST: "" }).variables).toEqual(["DB_HOST"]);
@@ -72,6 +82,13 @@ describe("config", () => {
     ["PORT", "0"],
     ["PORT", "65536"],
     ["DB_PORT", "abc"],
+    ["DB_PORT", "0x50"],
+    ["DB_PORT", "1e3"],
+    ["DB_PORT", " 80"],
+    ["DB_PORT", "-1"],
+    ["SHUTDOWN_TIMEOUT_MS", "2147483648"],
+    ["SHUTDOWN_TIMEOUT_MS", "0"],
+    ["DB_POOL_MAX", "1001"],
     ["DB_SSL", "yes"],
     ["DB_POOL_MAX", "0"],
     ["SHUTDOWN_TIMEOUT_MS", "-1"],

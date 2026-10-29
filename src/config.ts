@@ -1,20 +1,29 @@
 import { z } from "zod";
 
-const port = z.coerce.number().int().min(1).max(65535);
-const positiveInt = z.coerce.number().int().positive();
+/** Decimal digits only: `0x50`, `1e3` or ` 80` are typos, not numbers. */
+const decimal = (min: number, max: number) =>
+  z
+    .string()
+    .regex(/^\d+$/, "must be a decimal integer")
+    .transform(Number)
+    .pipe(z.number().min(min).max(max));
+
+const port = decimal(1, 65535);
+/** Largest delay `setTimeout` honours; above it the timer fires immediately. */
+const MAX_TIMER_MS = 2_147_483_647;
 const booleanFlag = z.enum(["true", "false"]).transform((value) => value === "true");
 
 const schema = z.object({
   PORT: port.default(3000),
   LOG_LEVEL: z.enum(["fatal", "error", "warn", "info", "debug", "trace", "silent"]).default("info"),
-  SHUTDOWN_TIMEOUT_MS: positiveInt.default(25000),
+  SHUTDOWN_TIMEOUT_MS: decimal(1, MAX_TIMER_MS).default(25000),
   DB_HOST: z.string().min(1),
   DB_PORT: port.default(3306),
   DB_USER: z.string().min(1),
   DB_PASSWORD: z.string().min(1),
   DB_NAME: z.string().min(1),
   DB_SSL: booleanFlag.default(false),
-  DB_POOL_MAX: positiveInt.default(10),
+  DB_POOL_MAX: decimal(1, 1000).default(10),
 });
 
 export interface DatabaseConfig {
