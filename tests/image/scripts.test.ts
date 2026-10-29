@@ -6,6 +6,19 @@ import { imageScript } from "./docker";
 
 const pkg = JSON.parse(readFileSync("package.json", "utf8")) as { version: string };
 
+/**
+ * Push tests run with an empty Docker config: no registry credentials, so even a broken guard can
+ * never publish anything. Anonymous reads of the public repository still work.
+ */
+function withoutCredentials<T>(run: (env: Record<string, string>) => T): T {
+  const dir = mkdtempSync(join(tmpdir(), "docker-config-"));
+  try {
+    return run({ DOCKER_CONFIG: dir });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 /** An old release with fixed HIGH and CRITICAL vulnerabilities in its OS packages. */
 const VULNERABLE_IMAGE = "node:14.21.3-alpine3.17";
 
@@ -47,7 +60,7 @@ describe("image script", () => {
     const marker = ".push-dirty-tree-test";
     writeFileSync(marker, "uncommitted\n");
     try {
-      const run = imageScript("push");
+      const run = withoutCredentials((env) => imageScript("push", env));
       expect(run.status).toBe(1);
       expect(run.stderr).toContain("uncommitted changes");
       expect(run.stdout + run.stderr).not.toMatch(/buildx|#\d+ \[/);
@@ -57,7 +70,7 @@ describe("image script", () => {
   });
 
   it("push refuses an existing version without pushing", () => {
-    const run = imageScript("push");
+    const run = withoutCredentials((env) => imageScript("push", env));
     expect(run.status).toBe(1);
     expect(run.stderr).toContain(`docker.io/lrambo/posts-api:${pkg.version} already exists`);
     expect(run.stdout).not.toContain("pushed");
