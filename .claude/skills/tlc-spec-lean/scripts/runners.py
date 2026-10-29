@@ -14,11 +14,19 @@ import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
 
 CD_RE = r"^(?:cd\s+(?P<cd>\S+)\s*&&\s*)?"
+
+
+def _run(cmd, **kwargs):
+    """subprocess.run with the executable resolved on PATH first: on Windows, CreateProcess finds
+    only `.exe` files, so shims such as `yarn.cmd` need their full path (local patch)."""
+    exe = shutil.which(cmd[0])
+    return subprocess.run([exe or cmd[0], *cmd[1:]], **kwargs)
 
 
 def _split(text):
@@ -120,7 +128,7 @@ class Vitest(Bun):
         with tempfile.TemporaryDirectory() as tmp:
             out = os.path.join(tmp, "junit.xml")
             cmd = [*launcher.split(), "vitest", "run", *sorted(files), "--reporter=junit", f"--outputFile={out}"]
-            subprocess.run(cmd, cwd=os.path.join(root, cwd), capture_output=True, text=True)
+            _run(cmd, cwd=os.path.join(root, cwd), capture_output=True, text=True)
             if not os.path.exists(out):
                 return None
             # vitest joins describe and test with " > "; its -t matches them joined by a space
@@ -145,7 +153,7 @@ class Jest(Bun):
         with tempfile.TemporaryDirectory() as tmp:
             out = os.path.join(tmp, "report.json")
             cmd = [*launcher.split(), "jest", *sorted(files), "--json", f"--outputFile={out}"]
-            subprocess.run(cmd, cwd=os.path.join(root, cwd), capture_output=True, text=True)
+            _run(cmd, cwd=os.path.join(root, cwd), capture_output=True, text=True)
             if not os.path.exists(out):
                 return None
             with open(out) as f:
@@ -176,7 +184,7 @@ class Pytest:
         with tempfile.TemporaryDirectory() as tmp:
             out = os.path.join(tmp, "junit.xml")
             cmd = [*launcher.split(), *sorted(files), f"--junitxml={out}", "-q"]
-            subprocess.run(cmd, cwd=os.path.join(root, cwd), capture_output=True, text=True)
+            _run(cmd, cwd=os.path.join(root, cwd), capture_output=True, text=True)
             return _junit(out) if os.path.exists(out) else None
 
     @staticmethod

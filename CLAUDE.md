@@ -3,7 +3,8 @@
 Skills in `.claude/skills/` are vendored from
 [tech-leads-club/agent-skills](https://github.com/tech-leads-club/agent-skills) at commit
 `738451e`, trimmed to this stack (Express API, no UI): screen verification, the skill selftest
-and non-Express security references were removed.
+and non-Express security references were removed. One local patch: `tlc-spec-lean/scripts/runners.py` resolves the
+test runner on `PATH` with `shutil.which`, so `yarn.cmd` launches on Windows.
 
 - Write code, commits, docs, ADRs and `.specs/` files in English.
 - Run skill scripts with `python`, not `python3` (on this machine `python3` is the Microsoft Store stub).
