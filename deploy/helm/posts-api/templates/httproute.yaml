@@ -1,0 +1,24 @@
+{{- if .Values.httpRoute.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "posts-api.fullname" . }}
+  labels:
+    {{- include "posts-api.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+    {{- toYaml .Values.httpRoute.parentRefs | nindent 4 }}
+  {{- with .Values.httpRoute.hostnames }}
+  hostnames:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  rules:
+    # only the API is public: /healthz, /readyz and /metrics are not routed
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /posts
+      backendRefs:
+        - name: {{ include "posts-api.fullname" . }}
+          port: 80
+{{- end }}

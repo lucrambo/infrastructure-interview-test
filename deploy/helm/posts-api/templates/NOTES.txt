@@ -1,0 +1,8 @@
+{{ include "posts-api.fullname" . }} {{ .Chart.AppVersion }} is deployed in namespace {{ .Release.Namespace }}.
+{{- if .Values.httpRoute.enabled }}
+
+The API is routed through the Gateway {{ (index .Values.httpRoute.parentRefs 0).name }} on /posts.
+{{- end }}
+
+Watch the rollout:
+  kubectl -n {{ .Release.Namespace }} rollout status deployment/{{ include "posts-api.fullname" . }}

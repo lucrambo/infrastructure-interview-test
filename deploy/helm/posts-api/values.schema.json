@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["image", "autoscaling", "database", "config"],
+  "properties": {
+    "image": {
+      "type": "object",
+      "required": ["repository"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "tag": { "type": "string" },
+        "digest": { "type": "string", "pattern": "^(|sha256:[0-9a-f]{64})$" },
+        "pullPolicy": { "enum": ["Always", "IfNotPresent", "Never"] }
+      },
+      "additionalProperties": false
+    },
+    "imagePullSecrets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": { "name": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "imageCredentials": {
+      "type": "object",
+      "properties": {
+        "registry": { "type": "string" },
+        "username": { "type": "string" },
+        "password": { "type": "string" }
+      },
+      "if": { "properties": { "registry": { "minLength": 1 } }, "required": ["registry"] },
+      "then": {
+        "properties": {
+          "username": { "minLength": 1 },
+          "password": { "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    },
+    "replicaCount": { "type": "integer", "minimum": 1 },
+    "autoscaling": {
+      "type": "object",
+      "required": ["enabled", "minReplicas", "maxReplicas", "targetCPUUtilizationPercentage"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "minReplicas": { "type": "integer", "minimum": 3 },
+        "maxReplicas": { "type": "integer", "minimum": 3 },
+        "targetCPUUtilizationPercentage": { "type": "integer", "minimum": 1, "maximum": 100 }
+      },
+      "additionalProperties": false
+    },
+    "podDisruptionBudget": {
+      "type": "object",
+      "properties": { "maxUnavailable": { "type": "integer", "minimum": 1 } },
+      "additionalProperties": false
+    },
+    "resources": { "type": "object" },
+    "config": {
+      "type": "object",
+      "required": ["logLevel", "shutdownTimeoutMs"],
+      "properties": {
+        "logLevel": { "enum": ["fatal", "error", "warn", "info", "debug", "trace", "silent"] },
+        "shutdownTimeoutMs": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "terminationGracePeriodSeconds": { "type": "integer", "minimum": 1 },
+    "preStopSleepSeconds": { "type": "integer", "minimum": 0 },
+    "database": {
+      "type": "object",
+      "required": ["host", "port", "name", "user"],
+      "properties": {
+        "host": { "type": "string", "minLength": 1 },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "name": { "type": "string", "minLength": 1 },
+        "user": { "type": "string", "minLength": 1 },
+        "ssl": { "type": "boolean" },
+        "poolMax": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "password": { "type": "string" },
+        "existingSecret": { "type": "string" },
+        "existingSecretKey": { "type": "string", "minLength": 1 }
+      },
+      "anyOf": [
+        { "properties": { "password": { "minLength": 1 } }, "required": ["password"] },
+        { "properties": { "existingSecret": { "minLength": 1 } }, "required": ["existingSecret"] }
+      ],
+      "additionalProperties": false
+    },
+    "httpRoute": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "parentRefs": { "type": "array", "items": { "type": "object", "required": ["name"] } },
+        "hostnames": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "rateLimit": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "requests": { "type": "integer", "minimum": 1 },
+        "unit": { "enum": ["Second", "Minute", "Hour"] }
+      },
+      "additionalProperties": false
+    },
+    "networkPolicy": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "gatewayNamespace": { "type": "string", "minLength": 1 },
+        "monitoringNamespace": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "podAnnotations": { "type": "object" },
+    "nodeSelector": { "type": "object" },
+    "tolerations": { "type": "array" }
+  },
+  "additionalProperties": false
+}

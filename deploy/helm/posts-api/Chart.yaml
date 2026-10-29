@@ -1,0 +1,10 @@
+apiVersion: v2
+name: posts-api
+description: HTTP API for posts and their categories, deployed highly available across zones.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+kubeVersion: ">=1.30.0-0"
+home: https://github.com/lucrambo/infrastructure-interview-test
+sources:
+  - https://github.com/lucrambo/infrastructure-interview-test

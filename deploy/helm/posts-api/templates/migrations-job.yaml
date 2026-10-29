@@ -1,0 +1,37 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "posts-api.fullname" . }}-migrations
+  labels:
+    {{- include "posts-api.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migrations
+  annotations:
+    # runs once per install and upgrade, before the new pods; a failure fails the release
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 300
+  template:
+    metadata:
+      labels:
+        {{- include "posts-api.labels" . | nindent 8 }}
+        app.kubernetes.io/component: migrations
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ include "posts-api.fullname" . }}
+      automountServiceAccountToken: false
+      {{- include "posts-api.imagePullSecrets" . | nindent 6 }}
+      securityContext:
+        {{- include "posts-api.podSecurityContext" . | nindent 8 }}
+      containers:
+        - name: migrations
+          image: {{ include "posts-api.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["node_modules/typeorm/cli.js", "migration:run", "-d", "dist/data-source.js"]
+          {{- include "posts-api.env" . | nindent 10 }}
+          securityContext:
+            {{- include "posts-api.containerSecurityContext" . | nindent 12 }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

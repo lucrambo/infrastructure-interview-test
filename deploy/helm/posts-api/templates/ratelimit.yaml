@@ -1,0 +1,20 @@
+{{- if and .Values.httpRoute.enabled .Values.rateLimit.enabled }}
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: {{ include "posts-api.fullname" . }}
+  labels:
+    {{- include "posts-api.labels" . | nindent 4 }}
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: {{ include "posts-api.fullname" . }}
+  rateLimit:
+    type: Local
+    local:
+      rules:
+        - limit:
+            requests: {{ .Values.rateLimit.requests }}
+            unit: {{ .Values.rateLimit.unit }}
+{{- end }}

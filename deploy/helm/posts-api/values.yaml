@@ -1,0 +1,85 @@
+# Default values for posts-api. Every key is validated by values.schema.json.
+
+image:
+  repository: docker.io/lrambo/posts-api
+  # Defaults to the chart's appVersion. Versions are immutable (ADR-002).
+  tag: ""
+  # When set, the image is pulled by digest and `tag` is ignored.
+  digest: ""
+  pullPolicy: IfNotPresent
+
+# Existing registry secrets, for example `[{name: regcred}]`.
+imagePullSecrets: []
+# When `registry` is set, the chart creates a dockerconfigjson Secret for it and uses it.
+imageCredentials:
+  registry: ""
+  username: ""
+  password: ""
+
+# Used only when autoscaling is disabled.
+replicaCount: 3
+
+autoscaling:
+  enabled: true
+  # Below 3 a zone outage could leave no replica (values.schema.json enforces it).
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+podDisruptionBudget:
+  maxUnavailable: 1
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    # No CPU limit: it would throttle the event loop without protecting the node.
+    memory: 256Mi
+
+config:
+  logLevel: info
+  # Drain budget after SIGTERM; it must fit in terminationGracePeriodSeconds minus preStop.
+  shutdownTimeoutMs: 25000
+
+terminationGracePeriodSeconds: 35
+# Time for the endpoint removal to reach every proxy before the server stops accepting.
+preStopSleepSeconds: 5
+
+database:
+  host: ""
+  port: 3306
+  name: posts
+  user: posts
+  ssl: false
+  poolMax: 10
+  # Either `password` (the chart creates a Secret) or `existingSecret` (for example created by
+  # External Secrets from AWS Secrets Manager) must be set.
+  password: ""
+  existingSecret: ""
+  existingSecretKey: password
+
+httpRoute:
+  enabled: true
+  # The Gateway the platform owns.
+  parentRefs:
+    - name: public
+      namespace: gateway
+  hostnames: []
+
+# Envoy Gateway local rate limit on the route.
+rateLimit:
+  enabled: false
+  requests: 100
+  unit: Second
+
+networkPolicy:
+  enabled: true
+  # Namespace of the gateway's proxy pods (Envoy Gateway runs them in envoy-gateway-system).
+  gatewayNamespace: envoy-gateway-system
+  # Namespace allowed to scrape /metrics.
+  monitoringNamespace: monitoring
+
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
