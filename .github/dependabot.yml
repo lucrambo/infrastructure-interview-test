@@ -1,0 +1,26 @@
+# Weekly update pull requests for every dependency source (ci-release AC 10).
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      production:
+        dependency-type: production
+      development:
+        dependency-type: development
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: terraform
+    directories:
+      - /deploy/terraform/local
+      - /deploy/terraform/aws
+    schedule:
+      interval: weekly
