@@ -13,14 +13,17 @@ export async function postGetAllAction(
 ): Promise<void> {
   const { limit, after } = parse(listQuerySchema, request.query);
 
-  // one extra row tells whether a next page exists without a COUNT query
+  // one extra row tells whether a next page exists without a COUNT query. Ordering by a joined
+  // column would make `take` count post-category rows instead of posts, so categories are sorted
+  // here rather than in SQL.
   const rows = await dataSource.getRepository(Post).find({
     where: after === undefined ? {} : { id: MoreThan(after) },
     relations: { categories: true },
-    order: { id: "ASC", categories: { id: "ASC" } },
+    order: { id: "ASC" },
     take: limit + 1,
   });
   const posts = rows.slice(0, limit);
+  for (const post of posts) post.categories.sort((a, b) => a.id - b.id);
 
   const last = posts.at(-1);
   if (rows.length > limit && last !== undefined) {

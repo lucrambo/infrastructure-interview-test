@@ -23,11 +23,14 @@ beforeEach(async () => {
 
 const valid = { title: "Hello", text: "World", categories: [{ name: "news" }] };
 
-async function createPosts(count: number): Promise<void> {
+async function createPosts(count: number, categoriesPerPost = 1): Promise<void> {
   for (let i = 1; i <= count; i++) {
+    const categories = Array.from({ length: categoriesPerPost }, (_, j) => ({
+      name: j === 0 ? `c${i}` : `c${i}-${j}`,
+    }));
     await request(app)
       .post("/posts")
-      .send({ title: `post ${i}`, text: "body", categories: [{ name: `c${i}` }] })
+      .send({ title: `post ${i}`, text: "body", categories })
       .expect(201);
   }
 }
@@ -173,6 +176,25 @@ describe("GET /posts pagination", () => {
     expect((res.body as { id: number }[]).map((p) => p.id)).toEqual([21, 22, 23, 24, 25]);
     expect(res.headers.link).toBeUndefined();
   });
+
+  it.each([2, 10])(
+    "counts posts, not post-category rows, when each post has %i categories",
+    async (perPost) => {
+      await createPosts(25, perPost);
+      const first = await request(app).get("/posts");
+      const page = first.body as { id: number; categories: { id: number }[] }[];
+      expect(page.map((p) => p.id)).toEqual(Array.from({ length: 20 }, (_, i) => i + 1));
+      for (const post of page) {
+        expect(post.categories).toHaveLength(perPost);
+        const ids = post.categories.map((c) => c.id);
+        expect(ids).toEqual([...ids].sort((a, b) => a - b));
+      }
+      expect(first.headers.link).toBe('</posts?limit=20&after=20>; rel="next"');
+      const rest = await request(app).get("/posts?after=20");
+      expect((rest.body as { id: number }[]).map((p) => p.id)).toEqual([21, 22, 23, 24, 25]);
+      expect(rest.headers.link).toBeUndefined();
+    },
+  );
 
   it("has no next link when exactly one page exists", async () => {
     await createPosts(20);
