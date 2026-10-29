@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { find, kinds, NAME, render, SELECTOR } from "./render";
+import { API_SELECTOR, find, kinds, NAME, render } from "./render";
 
 const defaults = render();
 
@@ -7,7 +7,7 @@ describe("exposure", () => {
   it("service is ClusterIP on port 80 to the container port http", () => {
     expect(find(defaults, "Service").spec).toEqual({
       type: "ClusterIP",
-      selector: SELECTOR,
+      selector: API_SELECTOR,
       ports: [{ name: "http", port: 80, targetPort: "http", protocol: "TCP" }],
     });
   });
@@ -49,6 +49,10 @@ describe("exposure", () => {
         local: { rules: [{ limit: { requests: 100, unit: "Second" } }] },
       },
     });
+    // without a route there is nothing to attach the policy to
+    expect(
+      kinds(render({ rateLimit: { enabled: true }, httpRoute: { enabled: false } })),
+    ).not.toContain("BackendTrafficPolicy");
     const custom = find(
       render({ rateLimit: { enabled: true, requests: 20, unit: "Minute" } }),
       "BackendTrafficPolicy",

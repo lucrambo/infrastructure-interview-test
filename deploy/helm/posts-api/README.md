@@ -10,16 +10,16 @@ helm upgrade --install posts deploy/helm/posts-api --namespace posts --create-na
 
 ## What it deploys
 
-| Object                                          | Why                                                                                                                                         |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Deployment`                                    | at least 3 replicas, spread one per zone (`DoNotSchedule`) and over nodes; rolling updates never drop a ready replica (`maxUnavailable: 0`) |
-| `HorizontalPodAutoscaler`                       | 3-10 replicas at 70% CPU; needs metrics-server                                                                                              |
-| `PodDisruptionBudget`                           | node drains evict one replica at a time                                                                                                     |
-| `Job` (hook)                                    | runs the migrations before each install and upgrade; a failure fails the release                                                            |
-| `Service` + `HTTPRoute`                         | only `/posts` is routed; `/healthz`, `/readyz` and `/metrics` stay internal                                                                 |
-| `BackendTrafficPolicy`                          | optional Envoy Gateway rate limit on the route (`rateLimit.enabled`)                                                                        |
-| `NetworkPolicy`                                 | ingress only from the gateway and monitoring namespaces; egress only to DNS and the database                                                |
-| `ConfigMap`, `Secret`, `ServiceAccount` (hooks) | configuration, created before the migrations Job; the service account has no API token                                                      |
+| Object                                  | Why                                                                                                                                                                |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Deployment`                            | at least 3 replicas, spread one per zone (`DoNotSchedule`) and over nodes; rolling updates never drop a ready replica (`maxUnavailable: 0`)                        |
+| `HorizontalPodAutoscaler`               | 3-10 replicas at 70% CPU; needs metrics-server                                                                                                                     |
+| `PodDisruptionBudget`                   | node drains evict one replica at a time                                                                                                                            |
+| `Job` (hook)                            | runs the migrations before each install and upgrade; a failure fails the release                                                                                   |
+| `Service` + `HTTPRoute`                 | only `/posts` is routed; `/healthz`, `/readyz` and `/metrics` stay internal                                                                                        |
+| `BackendTrafficPolicy`                  | optional Envoy Gateway rate limit on the route (`rateLimit.enabled`)                                                                                               |
+| `NetworkPolicy`                         | ingress only from the gateway and monitoring namespaces; egress only to DNS and the database                                                                       |
+| `ConfigMap`, `Secret`, `ServiceAccount` | configuration; the service account has no API token. The migrations Job gets hook copies (`<name>-migrations`) created just before it and deleted once it succeeds |
 
 Pods run as uid 65532 with a read-only root filesystem, no capabilities and the `RuntimeDefault`
 seccomp profile. On termination the kubelet waits `preStopSleepSeconds` (5) so the endpoint
@@ -48,12 +48,14 @@ inside `terminationGracePeriodSeconds` (35).
 
 `values.schema.json` validates every value; `helm template` fails naming the offending field.
 
+## Guards
+
+Beyond `values.schema.json`, rendering fails when `autoscaling.maxReplicas` is below
+`minReplicas`, or when `preStopSleepSeconds` plus `config.shutdownTimeoutMs` does not fit inside
+`terminationGracePeriodSeconds`.
+
 ## Uninstalling
 
-The `ConfigMap`, `Secret` and `ServiceAccount` are Helm hooks (they must exist before the
-migrations Job on the first install), and Helm does not delete hooks on uninstall:
-
-```bash
-helm uninstall posts --namespace posts
-kubectl delete configmap,secret,serviceaccount -n posts -l app.kubernetes.io/instance=posts
-```
+Every object except the migrations hook copies is a tracked release resource, so
+`helm uninstall` removes it and `helm rollback` restores it. If a migrations Job fails, its hook
+copies stay for inspection and are replaced by the next upgrade.

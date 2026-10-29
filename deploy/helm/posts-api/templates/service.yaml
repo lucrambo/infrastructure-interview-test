@@ -7,7 +7,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    {{- include "posts-api.selectorLabels" . | nindent 4 }}
+    {{- include "posts-api.apiSelectorLabels" . | nindent 4 }}
   ports:
     - name: http
       port: 80

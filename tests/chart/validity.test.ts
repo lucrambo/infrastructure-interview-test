@@ -66,6 +66,7 @@ describe("validity", () => {
   it.each([
     ["replicaCount: 0", { replicaCount: 0 }, "replicaCount"],
     ["autoscaling.minReplicas: 1", { autoscaling: { minReplicas: 1 } }, "minReplicas"],
+    ["autoscaling.minReplicas: 2", { autoscaling: { minReplicas: 2 } }, "minReplicas"],
     ["empty image.repository", { image: { repository: "" } }, "repository"],
     ["missing database.host", { database: { host: "" } }, "host"],
   ])("schema rejects %s", (_case, values, field) => {
@@ -73,6 +74,31 @@ describe("validity", () => {
     expect(result.status).not.toBe(0);
     expect(result.stderr).toMatch(/values don't meet the specifications of the schema/);
     expect(result.stderr).toContain(field);
+  });
+
+  it("schema accepts 3 replicas, the zone-redundancy minimum", () => {
+    expect(render({ autoscaling: { minReplicas: 3, maxReplicas: 3 } }).status).toBe(0);
+  });
+
+  it.each([
+    [
+      "maxReplicas below minReplicas",
+      { autoscaling: { minReplicas: 5, maxReplicas: 4 } },
+      "autoscaling.maxReplicas (4) must be at least autoscaling.minReplicas (5)",
+    ],
+    [
+      "a grace period shorter than preStop plus the drain",
+      { terminationGracePeriodSeconds: 30 },
+      "terminationGracePeriodSeconds (30) must exceed preStopSleepSeconds plus config.shutdownTimeoutMs in seconds (30)",
+    ],
+  ])("guards reject %s", (_case, values, message) => {
+    const result = render(values);
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain(message);
+  });
+
+  it("guards accept a grace period one second longer than preStop plus the drain", () => {
+    expect(render({ terminationGracePeriodSeconds: 31 }).status).toBe(0);
   });
 
   it("checksum changes with the configuration and the password, and only with them", () => {

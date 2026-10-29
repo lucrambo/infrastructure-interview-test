@@ -8,4 +8,4 @@ spec:
   maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
   selector:
     matchLabels:
-      {{- include "posts-api.selectorLabels" . | nindent 6 }}
+      {{- include "posts-api.apiSelectorLabels" . | nindent 6 }}

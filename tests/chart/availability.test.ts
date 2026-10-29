@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { container, find, kinds, podSpec, render, SELECTOR, type Any } from "./render";
+import { API_SELECTOR, container, find, kinds, podSpec, render, type Any } from "./render";
 
 const defaults = render();
 const deployment = find(defaults, "Deployment");
@@ -11,17 +11,17 @@ describe("availability", () => {
         maxSkew: 1,
         topologyKey: "topology.kubernetes.io/zone",
         whenUnsatisfiable: "DoNotSchedule",
-        labelSelector: { matchLabels: SELECTOR },
+        labelSelector: { matchLabels: API_SELECTOR },
       },
       {
         maxSkew: 1,
         topologyKey: "kubernetes.io/hostname",
         whenUnsatisfiable: "ScheduleAnyway",
-        labelSelector: { matchLabels: SELECTOR },
+        labelSelector: { matchLabels: API_SELECTOR },
       },
     ]);
-    expect((deployment.spec as Any).selector.matchLabels).toEqual(SELECTOR);
-    expect((deployment.spec as Any).template.metadata.labels).toMatchObject(SELECTOR);
+    expect((deployment.spec as Any).selector.matchLabels).toEqual(API_SELECTOR);
+    expect((deployment.spec as Any).template.metadata.labels).toMatchObject(API_SELECTOR);
   });
 
   it("autoscaling on by default: HPA 3-10 at 70% CPU and no fixed replicas", () => {
@@ -52,7 +52,7 @@ describe("availability", () => {
   it("disruption budget allows one voluntary eviction at a time", () => {
     const pdb = find(defaults, "PodDisruptionBudget");
     expect(pdb.apiVersion).toBe("policy/v1");
-    expect(pdb.spec).toEqual({ maxUnavailable: 1, selector: { matchLabels: SELECTOR } });
+    expect(pdb.spec).toEqual({ maxUnavailable: 1, selector: { matchLabels: API_SELECTOR } });
   });
 
   it("rollout surges before it removes a ready replica", () => {

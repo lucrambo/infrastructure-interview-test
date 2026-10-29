@@ -1,3 +1,4 @@
+{{- include "posts-api.validate" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -11,7 +12,7 @@ spec:
   revisionHistoryLimit: 5
   selector:
     matchLabels:
-      {{- include "posts-api.selectorLabels" . | nindent 6 }}
+      {{- include "posts-api.apiSelectorLabels" . | nindent 6 }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -22,6 +23,7 @@ spec:
     metadata:
       labels:
         {{- include "posts-api.labels" . | nindent 8 }}
+        app.kubernetes.io/component: api
       annotations:
         # rolls the pods when the configuration or the password changes
         checksum/config: {{ printf "%s\n%s" (include "posts-api.configData" .) .Values.database.password | sha256sum }}
@@ -42,14 +44,14 @@ spec:
           whenUnsatisfiable: DoNotSchedule
           labelSelector:
             matchLabels:
-              {{- include "posts-api.selectorLabels" . | nindent 14 }}
+              {{- include "posts-api.apiSelectorLabels" . | nindent 14 }}
         # soft: spread over nodes inside a zone when capacity allows
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              {{- include "posts-api.selectorLabels" . | nindent 14 }}
+              {{- include "posts-api.apiSelectorLabels" . | nindent 14 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

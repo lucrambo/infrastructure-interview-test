@@ -12,6 +12,12 @@ app.kubernetes.io/name: {{ .Chart.Name }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
+{{/* The API pods only: the migrations Job shares the release labels but not this component. */}}
+{{- define "posts-api.apiSelectorLabels" -}}
+{{ include "posts-api.selectorLabels" . }}
+app.kubernetes.io/component: api
+{{- end -}}
+
 {{- define "posts-api.labels" -}}
 {{ include "posts-api.selectorLabels" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
@@ -28,8 +34,13 @@ helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version }}
 {{- end -}}
 {{- end -}}
 
+{{/* The Secret holding the password; `suffix` names the migrations copy. */}}
 {{- define "posts-api.secretName" -}}
-{{- default (include "posts-api.fullname" .) .Values.database.existingSecret -}}
+{{- if .Values.database.existingSecret -}}
+{{- .Values.database.existingSecret -}}
+{{- else -}}
+{{- printf "%s%s" (include "posts-api.fullname" .) (default "" .suffix) -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "posts-api.secretKey" -}}
@@ -37,17 +48,33 @@ helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version }}
 {{- end -}}
 
 {{- define "posts-api.registrySecretName" -}}
-{{- printf "%s-registry" (include "posts-api.fullname" .) -}}
+{{- printf "%s%s-registry" (include "posts-api.fullname" .) (default "" .suffix) -}}
 {{- end -}}
 
 {{/*
-Configuration objects are pre-install/pre-upgrade hooks with a lower weight than the migrations
-Job, so they exist before the Job runs on the first install. They are recreated on each upgrade.
+The migrations Job is a pre-install/pre-upgrade hook, so it runs before the release's own
+objects exist. It gets hook copies of the configuration, created just before it and deleted with
+it once every hook succeeded; the release objects stay normal, tracked resources.
 */}}
-{{- define "posts-api.configHook" -}}
+{{- define "posts-api.migrationsHook" -}}
 helm.sh/hook: pre-install,pre-upgrade
 helm.sh/hook-weight: "-5"
-helm.sh/hook-delete-policy: before-hook-creation
+helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+{{- end -}}
+
+{{- define "posts-api.migrationsName" -}}
+{{- printf "%s-migrations" (include "posts-api.fullname" .) -}}
+{{- end -}}
+
+{{/* Fails the render when values contradict each other. */}}
+{{- define "posts-api.validate" -}}
+{{- if lt (int .Values.autoscaling.maxReplicas) (int .Values.autoscaling.minReplicas) -}}
+{{- fail (printf "autoscaling.maxReplicas (%d) must be at least autoscaling.minReplicas (%d)" (int .Values.autoscaling.maxReplicas) (int .Values.autoscaling.minReplicas)) -}}
+{{- end -}}
+{{- $needed := add (int .Values.preStopSleepSeconds) (div (int .Values.config.shutdownTimeoutMs) 1000) -}}
+{{- if ge (int $needed) (int .Values.terminationGracePeriodSeconds) -}}
+{{- fail (printf "terminationGracePeriodSeconds (%d) must exceed preStopSleepSeconds plus config.shutdownTimeoutMs in seconds (%d)" (int .Values.terminationGracePeriodSeconds) (int $needed)) -}}
+{{- end -}}
 {{- end -}}
 
 {{- define "posts-api.configData" -}}
@@ -78,6 +105,7 @@ capabilities:
   drop: ["ALL"]
 {{- end -}}
 
+{{/* Called with the root context, or with `suffix` set for the migrations copies. */}}
 {{- define "posts-api.imagePullSecrets" -}}
 {{- $secrets := .Values.imagePullSecrets -}}
 {{- if .Values.imageCredentials.registry -}}
@@ -92,7 +120,7 @@ imagePullSecrets:
 {{- define "posts-api.env" -}}
 envFrom:
   - configMapRef:
-      name: {{ include "posts-api.fullname" . }}
+      name: {{ printf "%s%s" (include "posts-api.fullname" .) (default "" .suffix) }}
 env:
   - name: DB_PASSWORD
     valueFrom:

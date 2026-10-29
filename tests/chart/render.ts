@@ -97,7 +97,13 @@ export function container(obj: K8sObject): Any {
   return podSpec(obj).containers[0];
 }
 
+/** Every pod of the release, the migrations Job included (the NetworkPolicy selects these). */
 export const SELECTOR = {
   "app.kubernetes.io/name": "posts-api",
   "app.kubernetes.io/instance": RELEASE,
 };
+
+/** The API pods only: what the Service, PDB, HPA and spread constraints select. */
+export const API_SELECTOR = { ...SELECTOR, "app.kubernetes.io/component": "api" };
+
+export const MIGRATIONS = `${NAME}-migrations`;

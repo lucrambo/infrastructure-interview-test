@@ -1,0 +1,57 @@
+{{- /* Hook copies for the migrations Job; see posts-api.migrationsHook. */ -}}
+{{- $m := merge (dict "suffix" "-migrations") . }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "posts-api.migrationsName" . }}
+  labels:
+    {{- include "posts-api.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migrations
+  annotations:
+    {{- include "posts-api.migrationsHook" . | nindent 4 }}
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "posts-api.migrationsName" . }}
+  labels:
+    {{- include "posts-api.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migrations
+  annotations:
+    {{- include "posts-api.migrationsHook" . | nindent 4 }}
+data:
+  {{- include "posts-api.configData" . | nindent 2 }}
+{{- if not .Values.database.existingSecret }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "posts-api.secretName" $m }}
+  labels:
+    {{- include "posts-api.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migrations
+  annotations:
+    {{- include "posts-api.migrationsHook" . | nindent 4 }}
+type: Opaque
+data:
+  password: {{ .Values.database.password | b64enc | quote }}
+{{- end }}
+{{- with .Values.imageCredentials }}
+{{- if .registry }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "posts-api.registrySecretName" $m }}
+  labels:
+    {{- include "posts-api.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: migrations
+  annotations:
+    {{- include "posts-api.migrationsHook" $ | nindent 4 }}
+type: kubernetes.io/dockerconfigjson
+data:
+  {{- $auth := printf "%s:%s" .username .password | b64enc }}
+  .dockerconfigjson: {{ dict "auths" (dict .registry (dict "username" .username "password" .password "auth" $auth)) | toJson | b64enc | quote }}
+{{- end }}
+{{- end }}
