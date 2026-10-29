@@ -83,6 +83,9 @@ cmd_deploy() {
     --set database.host="$(out database_host)" \
     --set database.existingSecret="$(out database_secret)" \
     --wait --timeout 10m
+  # on a first install the Deployment starts at 1 replica until the HPA raises it to its minimum
+  kubectl --namespace "$(out app_namespace)" wait "deployment/$RELEASE-posts-api" \
+    --for=jsonpath='{.status.readyReplicas}'=3 --timeout=5m
 }
 
 cmd_test() {
