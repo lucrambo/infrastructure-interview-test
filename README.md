@@ -66,6 +66,53 @@ docker run --rm -e DB_HOST=... docker.io/lrambo/posts-api:0.1.0 \
 To release, bump `version` in `package.json`, commit, run `scripts/image.sh scan`, then
 `scripts/image.sh push` while logged in to Docker Hub with push rights.
 
+## Local Kubernetes
+
+`scripts/local.sh` builds a production-like environment on this machine and tests the service in
+it. Terraform ([`deploy/terraform/local`](deploy/terraform/local)) creates:
+
+- a kind cluster with 1 control-plane and 3 workers labelled `zone-a`, `zone-b`, `zone-c`;
+- Envoy Gateway with the Gateway `public` on `http://localhost:8080` (2 proxies in 2 zones);
+- MySQL 8.4 as a 3-member InnoDB Cluster, one member per zone, behind 2 MySQL Routers;
+- metrics-server for the autoscaler;
+- a private registry with authentication on `localhost:5001`.
+
+The application is then released with its Helm chart ([`deploy/helm/posts-api`](deploy/helm/posts-api)),
+pulled from the private registry with credentials.
+
+```bash
+scripts/local.sh all      # up + deploy + test
+scripts/local.sh up       # create or update the environment
+scripts/local.sh deploy   # build this commit, push it to the private registry, helm upgrade
+scripts/local.sh test     # functional, load and availability scenarios (yarn test:e2e)
+scripts/local.sh down     # destroy everything
+```
+
+Requires Docker (8 GB of memory), kind, Terraform, Helm, kubectl, k6, Node.js 24 and Bash. The
+scenarios in [`tests/e2e`](tests/e2e) and [`tests/k6`](tests/k6) check, through the gateway, the
+API contract, 30 req/s for 60 s under 1% errors and 500 ms p95, the rate limit, one replica per
+zone, a rolling upgrade with zero failed requests, the network policy, the autoscaler metrics, and
+the loss of the worker that hosts the MySQL primary.
+
+## CI and releases
+
+[`ci`](.github/workflows/ci.yml) runs on every pull request and push to `main`: lint, types,
+unit and integration tests and the dependency audit (`verify`); the chart (`chart`); the image
+build, scan and tests (`image`); `terraform fmt` and `validate` (`terraform`); and the whole local
+environment with every scenario (`e2e`). Require these checks in the branch protection of `main`.
+Actions are pinned to commit SHAs and Dependabot proposes updates weekly.
+
+[`release`](.github/workflows/release.yml) runs when a tag `v<version>` matching `package.json` is
+pushed: it reruns `ci`, scans, pushes both platforms and signs the digest with cosign keyless. It
+needs the repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (a Docker Hub access token
+with push rights). Verify a released image with:
+
+```bash
+cosign verify docker.io/lrambo/posts-api:<version> \
+  --certificate-identity-regexp '^https://github.com/lucrambo/infrastructure-interview-test/.github/workflows/release.yml@refs/tags/v' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
 ## Configuration
 
 Every setting is an environment variable; an empty value counts as unset. The process exits with
