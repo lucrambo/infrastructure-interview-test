@@ -1,22 +1,18 @@
-import {Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable} from "typeorm";
-import {Category} from "./Category";
+import { Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Category } from "./Category";
 
 @Entity()
 export class Post {
+  @PrimaryGeneratedColumn({ type: "integer" })
+  id!: number;
 
-    @PrimaryGeneratedColumn()
-    id: number;
+  @Column({ type: "varchar", length: 255 })
+  title!: string;
 
-    @Column()
-    title: string;
+  @Column({ type: "text" })
+  text!: string;
 
-    @Column("text")
-    text: string;
-
-    @ManyToMany(type => Category, {
-        cascade: true
-    })
-    @JoinTable()
-    categories: Category[];
-
+  @ManyToMany(() => Category, { cascade: true })
+  @JoinTable()
+  categories!: Category[];
 }
