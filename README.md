@@ -196,18 +196,19 @@ cosign verify docker.io/lrambo/posts-api:<version> \
 Every setting is an environment variable; an empty value counts as unset. The process exits with
 code 1, naming the offending variables (never their values), when one is missing or invalid.
 
-| Variable              | Default  | Meaning                                                        |
-| --------------------- | -------- | -------------------------------------------------------------- |
-| `PORT`                | `3000`   | HTTP port                                                      |
-| `LOG_LEVEL`           | `info`   | `fatal`, `error`, `warn`, `info`, `debug`, `trace` or `silent` |
-| `SHUTDOWN_TIMEOUT_MS` | `25000`  | longest drain after SIGTERM before exiting with code 1         |
-| `DB_HOST`             | required | MySQL host                                                     |
-| `DB_PORT`             | `3306`   | MySQL port                                                     |
-| `DB_USER`             | required | MySQL user                                                     |
-| `DB_PASSWORD`         | required | MySQL password                                                 |
-| `DB_NAME`             | required | database name                                                  |
-| `DB_SSL`              | `false`  | `true` connects over TLS and verifies the server certificate   |
-| `DB_POOL_MAX`         | `10`     | connections per replica                                        |
+| Variable              | Default  | Meaning                                                                 |
+| --------------------- | -------- | ----------------------------------------------------------------------- |
+| `PORT`                | `3000`   | HTTP port                                                               |
+| `LOG_LEVEL`           | `info`   | `fatal`, `error`, `warn`, `info`, `debug`, `trace` or `silent`          |
+| `SHUTDOWN_TIMEOUT_MS` | `25000`  | longest drain after SIGTERM before exiting with code 1                  |
+| `DB_HOST`             | required | MySQL host                                                              |
+| `DB_PORT`             | `3306`   | MySQL port                                                              |
+| `DB_USER`             | required | MySQL user                                                              |
+| `DB_PASSWORD`         | required | MySQL password                                                          |
+| `DB_NAME`             | required | database name                                                           |
+| `DB_SSL`              | `false`  | `true` connects over TLS and verifies the server certificate            |
+| `DB_POOL_MAX`         | `10`     | connections per replica                                                 |
+| `DB_QUERY_TIMEOUT_MS` | `5000`   | a query unanswered after this long fails and its connection is replaced |
 
 ## API
 
