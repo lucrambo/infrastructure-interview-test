@@ -13,7 +13,8 @@ export MSYS_NO_PATHCONV=1
 
 cd "$(dirname "$0")/.."
 
-IMAGE_REPO="${IMAGE_REPO:-docker.io/lrambo/posts-api}"
+PUBLIC_REPO="docker.io/lrambo/posts-api"
+IMAGE_REPO="${IMAGE_REPO:-$PUBLIC_REPO}"
 IMAGE="${IMAGE:-posts-api:local}"
 DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 PLATFORMS="linux/amd64,linux/arm64"
@@ -53,6 +54,10 @@ cmd_scan() {
 }
 
 cmd_push() {
+  # the public repository is published only by the release workflow (AD-008)
+  if [[ "$IMAGE_REPO" == "$PUBLIC_REPO" && "${GITHUB_ACTIONS:-}" != "true" ]]; then
+    die "$PUBLIC_REPO is published only by the release workflow: push a tag v<version>"
+  fi
   [[ -z "$(git status --porcelain)" ]] || die "the working tree has uncommitted changes; commit them first"
   local tag sha output
   tag="$(version)"
