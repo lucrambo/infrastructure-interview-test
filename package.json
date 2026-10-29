@@ -15,6 +15,7 @@
     "format": "prettier --write .",
     "test": "vitest run --project app",
     "test:image": "vitest run --project image",
+    "test:chart": "vitest run --project chart",
     "migration:run": "node --env-file-if-exists=.env node_modules/typeorm/cli.js migration:run -d dist/data-source.js",
     "migration:revert": "node --env-file-if-exists=.env node_modules/typeorm/cli.js migration:revert -d dist/data-source.js"
   },
@@ -44,6 +45,7 @@
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.1",
     "vite": "^8.3.5",
-    "vitest": "^5.0.5"
+    "vitest": "^5.0.5",
+    "yaml": "^2.9.1"
   }
 }

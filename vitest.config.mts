@@ -14,6 +14,11 @@ export default defineConfig({
         },
       },
       {
+        // renders the Helm chart; needs `helm` and Docker (kubeconform); `yarn test:chart`
+        extends: true,
+        test: { name: "chart", include: ["tests/chart/**/*.test.ts"] },
+      },
+      {
         // builds posts-api:local first; selected with `yarn test:image`
         extends: true,
         test: {
