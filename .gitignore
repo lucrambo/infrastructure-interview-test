@@ -2,11 +2,16 @@
 node_modules
 
 # Build output
-src/**/*.js
-src/**/*.js.map
 dist/
+coverage/
 
-# Environment / secrets
+# Yarn 4 (no zero-installs)
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+.pnp.*
+
+# Environment / secrets (ormconfig.env is the legacy local config file)
 ormconfig.env
 .env
 .env.*
@@ -22,3 +27,6 @@ yarn-error.log*
 Thumbs.db
 .idea/
 .vscode/
+
+# Python bytecode (skill scripts)
+__pycache__/
