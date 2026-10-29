@@ -1,0 +1,7 @@
+dist
+node_modules
+.yarn
+yarn.lock
+.claude
+.specs
+docs/adr

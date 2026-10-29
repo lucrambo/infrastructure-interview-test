@@ -1,43 +1,48 @@
 {
-  "name": "typeorm-typescript-express-example",
-  "version": "0.0.1",
-  "description": "Example how to use Express and TypeORM with TypeScript.",
+  "name": "posts-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "HTTP API for posts and their categories, backed by PostgreSQL.",
   "license": "MIT",
-  "readmeFilename": "README.md",
-  "author": {
-    "name": "Umed Khudoiberdiev",
-    "email": "pleerock.me@gmail.com"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/typeorm/typescript-express-example.git"
-  },
-  "bugs": {
-    "url": "https://github.com/typeorm/typescript-express-example/issues"
-  },
-  "tags": [
-    "orm",
-    "typescript",
-    "typescript-orm",
-    "typeorm-sample",
-    "typeorm-example",
-    "typeorm-express-example"
-  ],
-  "devDependencies": {
-    "@types/body-parser": "^1.16.8",
-    "@types/express": "^4.11.1",
-    "@types/node": "^9.6.5",
-    "typescript": "^3.3.3333",
-    "ts-node-dev": "^1.1.8"
-  },
-  "dependencies": {
-    "body-parser": "^1.18.2",
-    "express": "^4.16.3",
-    "mysql": "^2.15.0",
-    "typeorm": "^0.2.0"
+  "engines": {
+    "node": ">=24 <25"
   },
   "scripts": {
-    "start": "tsc && node src/index.js",
-    "typeorm": "ts-node-dev ./node_modules/typeorm/cli.js"
+    "build": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json",
+    "start": "node --env-file-if-exists=.env dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "test": "vitest run",
+    "migration:run": "node --env-file-if-exists=.env node_modules/typeorm/cli.js migration:run -d dist/data-source.js",
+    "migration:revert": "node --env-file-if-exists=.env node_modules/typeorm/cli.js migration:revert -d dist/data-source.js"
+  },
+  "packageManager": "yarn@4.18.1+sha512.b2e1e7524f654f2749d32b4ebcb4622473cb5bcbc485df2007e12a154e50162a4d795526768bc5f5b8f81717bfd79deb2472813d86fb5ae2eb551fa9c872b08f",
+  "dependencies": {
+    "express": "^5.3.0",
+    "helmet": "^8.3.0",
+    "mysql2": "^3.24.6",
+    "pino": "^10.4.0",
+    "prom-client": "^15.1.3",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^1.1.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@testcontainers/mysql": "^12.2.1",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.19.2",
+    "@types/supertest": "^7.2.1",
+    "eslint": "^10.13.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10",
+    "supertest": "^7.3.1",
+    "testcontainers": "^12.2.1",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
   }
 }
