@@ -15,6 +15,16 @@ import {
 
 const API = "app.kubernetes.io/component=api";
 
+function onlineMembers(): number {
+  return kubectlJson<{ status: { cluster: { onlineInstances: number } } }>(
+    "get",
+    "innodbcluster",
+    "mysql",
+    "-n",
+    "database",
+  ).status.cluster.onlineInstances;
+}
+
 function readyApiPods() {
   return pods("posts", API).filter(
     (p) => !p.metadata.deletionTimestamp && p.status.containerStatuses?.[0]?.ready === true,
@@ -136,6 +146,20 @@ describe("availability", () => {
       }
     } finally {
       run("docker", ["start", node]);
+      await waitFor(
+        "the node to be Ready",
+        () =>
+          kubectlJson<{ status: { conditions: { type: string; status: string }[] } }>(
+            "get",
+            "node",
+            node,
+          ).status.conditions.find((c) => c.type === "Ready")?.status === "True",
+        300_000,
+      );
+      // after a hard stop the operator may not rejoin the member by itself; a new pod triggers it
+      await waitFor("the member to rejoin", () => onlineMembers() === 3, 120_000).catch(() => {
+        kubectl("delete", "pod", "-n", "database", primary?.metadata.name ?? "", "--wait=false");
+      });
       await waitFor(
         "the node and the database to recover",
         () => {
