@@ -1,0 +1,23 @@
+[
+  {
+    "file": "deploy/helm/posts-api/values.schema.json",
+    "old": "\"minReplicas\": { \"type\": \"integer\", \"minimum\": 3 }",
+    "new": "\"minReplicas\": { \"type\": \"integer\", \"minimum\": 2 }",
+    "proof": "yarn vitest run tests/chart/validity.test.ts -t \"schema rejects\"",
+    "label": "schema accepts autoscaling.minReplicas 2 (zone-redundancy bound shifted by one)"
+  },
+  {
+    "file": "deploy/helm/posts-api/templates/_helpers.tpl",
+    "old": "{{- $secrets = append $secrets (dict \"name\" (include \"posts-api.registrySecretName\" .)) -}}",
+    "new": "{{- $secrets = list (dict \"name\" (include \"posts-api.registrySecretName\" .)) -}}",
+    "proof": "yarn vitest run tests/chart/security.test.ts -t \"pull secrets\"",
+    "label": "imageCredentials replaces the listed imagePullSecrets instead of adding to them"
+  },
+  {
+    "file": "deploy/helm/posts-api/templates/ratelimit.yaml",
+    "old": "{{- if and .Values.httpRoute.enabled .Values.rateLimit.enabled }}",
+    "new": "{{- if .Values.rateLimit.enabled }}",
+    "proof": "yarn vitest run tests/chart/exposure.test.ts -t \"rate limit\"",
+    "label": "rate limit policy renders without its HTTPRoute (dangling targetRef)"
+  }
+]
