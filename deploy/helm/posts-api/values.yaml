@@ -79,6 +79,9 @@ networkPolicy:
   gatewayNamespace: envoy-gateway-system
   # Namespace allowed to scrape /metrics.
   monitoringNamespace: monitoring
+  # Further TCP ports the pods may connect to, e.g. the target port of a database Service that
+  # remaps database.port.
+  extraEgressPorts: []
 
 podAnnotations: {}
 nodeSelector: {}

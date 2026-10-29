@@ -20,3 +20,5 @@ rateLimit:
 networkPolicy:
   gatewayNamespace: envoy-gateway-system
   monitoringNamespace: monitoring
+  # the mysql Service forwards 3306 to the MySQL Router's read-write port
+  extraEgressPorts: [6446]

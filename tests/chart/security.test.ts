@@ -63,6 +63,16 @@ describe("security", () => {
     });
   });
 
+  it("network policy also admits the extra egress ports, for Services that remap the database port", () => {
+    const policy = find(render({ networkPolicy: { extraEgressPorts: [6446] } }), "NetworkPolicy");
+    expect((policy.spec as { egress: unknown[] }).egress[1]).toEqual({
+      ports: [
+        { port: 3306, protocol: "TCP" },
+        { port: 6446, protocol: "TCP" },
+      ],
+    });
+  });
+
   it("password comes from the chart Secret and appears nowhere else", () => {
     for (const [workload, secretName] of [
       [find(defaults, "Deployment"), NAME],

@@ -110,7 +110,11 @@
       "properties": {
         "enabled": { "type": "boolean" },
         "gatewayNamespace": { "type": "string", "minLength": 1 },
-        "monitoringNamespace": { "type": "string", "minLength": 1 }
+        "monitoringNamespace": { "type": "string", "minLength": 1 },
+        "extraEgressPorts": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1, "maximum": 65535 }
+        }
       },
       "additionalProperties": false
     },

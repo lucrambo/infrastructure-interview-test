@@ -28,8 +28,14 @@ spec:
           protocol: UDP
         - port: 53
           protocol: TCP
-    # the database may live outside the cluster (RDS), so the rule is by port only
+    # the database may live outside the cluster (RDS), so the rule is by port only. Policies see
+    # the destination pod's port: behind a Service that remaps it (MySQL Router: 3306 -> 6446),
+    # list the pod port in networkPolicy.extraEgressPorts.
     - ports:
         - port: {{ .Values.database.port }}
           protocol: TCP
+        {{- range .Values.networkPolicy.extraEgressPorts }}
+        - port: {{ . }}
+          protocol: TCP
+        {{- end }}
 {{- end }}
