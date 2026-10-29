@@ -1,9 +1,32 @@
-import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { docker } from "./docker";
 
 const REPOSITORY = "lrambo/posts-api";
-const pkg = JSON.parse(readFileSync("package.json", "utf8")) as { version: string };
+
+/**
+ * The newest version on Docker Hub. The commit that bumps package.json is tested before its
+ * release publishes it, so these checks look at what is published, not at package.json.
+ */
+async function latestPublished(): Promise<string> {
+  const res = await fetch(
+    `https://hub.docker.com/v2/repositories/${REPOSITORY}/tags?page_size=100`,
+  );
+  const { results } = (await res.json()) as { results: { name: string }[] };
+  const versions = results
+    .map((t) => t.name)
+    .filter((name) => /^\d+\.\d+\.\d+$/.test(name))
+    .sort((a, b) => {
+      const [x, y] = [a, b].map((v) => v.split(".").map(Number));
+      return (
+        (x?.[0] ?? 0) - (y?.[0] ?? 0) ||
+        (x?.[1] ?? 0) - (y?.[1] ?? 0) ||
+        (x?.[2] ?? 0) - (y?.[2] ?? 0)
+      );
+    });
+  const latest = versions.at(-1);
+  if (!latest) throw new Error("no version published");
+  return latest;
+}
 
 interface Descriptor {
   digest: string;
@@ -27,6 +50,7 @@ async function anonymousManifest(reference: string): Promise<Response> {
 
 describe("published image", () => {
   it("published index holds amd64, arm64 and their attestations under both tags", async () => {
+    const pkg = { version: await latestPublished() };
     const raw = docker([
       "buildx",
       "imagetools",
@@ -89,6 +113,7 @@ describe("published image", () => {
   });
 
   it("anonymous clients can fetch the version manifest", async () => {
+    const pkg = { version: await latestPublished() };
     const res = await anonymousManifest(pkg.version);
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toBe("application/vnd.oci.image.index.v1+json");
