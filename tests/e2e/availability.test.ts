@@ -156,30 +156,20 @@ describe("availability", () => {
           ).status.conditions.find((c) => c.type === "Ready")?.status === "True",
         300_000,
       );
-      // after a hard stop the operator may not rejoin the member by itself; a new pod triggers it
-      await waitFor("the member to rejoin", () => onlineMembers() === 3, 120_000).catch(() => {
-        kubectl("delete", "pod", "-n", "database", primary?.metadata.name ?? "", "--wait=false");
-      });
+      // after a hard stop the member on that node does not rejoin by itself, and the cluster's
+      // status lags behind; a new pod makes the operator rejoin it
+      kubectl("delete", "pod", "-n", "database", primary?.metadata.name ?? "", "--wait=true");
       await waitFor(
-        "the node and the database to recover",
-        () => {
-          const ready =
-            kubectlJson<{ status: { conditions: { type: string; status: string }[] } }>(
-              "get",
-              "node",
-              node,
-            ).status.conditions.find((c) => c.type === "Ready")?.status === "True";
-          const cluster = kubectlJson<{ status: { cluster: { onlineInstances: number } } }>(
-            "get",
-            "innodbcluster",
-            "mysql",
-            "-n",
-            "database",
-          );
-          return (
-            ready && cluster.status.cluster.onlineInstances === 3 && readyApiPods().length === 3
-          );
-        },
+        "every MySQL member and API replica to be ready again",
+        () =>
+          pods("database", "mysql.oracle.com/cluster=mysql,component=mysqld").every(
+            (p) =>
+              !p.metadata.deletionTimestamp &&
+              (p.status.containerStatuses ?? []).length > 0 &&
+              (p.status.containerStatuses ?? []).every((c) => c.ready),
+          ) &&
+          onlineMembers() === 3 &&
+          readyApiPods().length === 3,
         600_000,
       );
     }
