@@ -94,6 +94,31 @@ API contract, 30 req/s for 60 s under 1% errors and 500 ms p95, the rate limit, 
 zone, a rolling upgrade with zero failed requests, the network policy, the autoscaler metrics, and
 the loss of the worker that hosts the MySQL primary.
 
+## Production on AWS
+
+[`deploy/terraform/aws`](deploy/terraform/aws) describes the production environment in 3
+availability zones. It is code only: the exercise forbids cost-incurring services, so it is proven
+with `terraform validate`, `terraform test` against mocked providers and a Trivy misconfiguration
+scan ([`scripts/scan-terraform.sh`](scripts/scan-terraform.sh)).
+
+| Layer    | What it creates                                                                                                                                                                           |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Network  | VPC with public, private and database subnets in each zone, one NAT gateway per zone, flow logs                                                                                           |
+| Compute  | EKS (KMS-encrypted secrets, API restricted to `api_allowed_cidrs`) with a Graviton node group of 3-9 nodes across the zones                                                               |
+| Database | RDS for MySQL 8.4 Multi-AZ DB cluster: a writer and two readable standbys, one per zone; TLS required, encrypted, 14-day backups, deletion protection, master password in Secrets Manager |
+| Platform | AWS Load Balancer Controller, Envoy Gateway behind an internet-facing NLB terminating TLS with ACM, metrics-server, External Secrets syncing the app's database secret                    |
+
+```bash
+terraform -chdir=deploy/terraform/aws init \
+  -backend-config="bucket=<state bucket>" -backend-config="key=posts-api/production.tfstate" \
+  -backend-config="region=us-east-1" -backend-config="use_lockfile=true"
+terraform -chdir=deploy/terraform/aws apply \
+  -var 'api_allowed_cidrs=["<your CIDR>"]' -var "certificate_arn=<ACM certificate ARN>"
+```
+
+The application is then released with [`deploy/production/values.yaml`](deploy/production/values.yaml),
+as its header shows.
+
 ## CI and releases
 
 [`ci`](.github/workflows/ci.yml) runs on every pull request and push to `main`: lint, types,
