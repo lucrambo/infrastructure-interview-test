@@ -126,7 +126,7 @@ jobs:
         with:
           version: ${{ env.KIND_VERSION }}
           install_only: true
-      - uses: grafana/setup-k6-action@43b9fc21641a76002687994433dd586f56e791b1 # v1.2.2
+      - uses: grafana/setup-k6-action@c47136d33d365efbeb9ae7266908b5dcf98cdece # v1.3.0
       - name: host settings for 4 kind nodes and 3 MySQL servers
         # the runner ships MySQL with an AppArmor profile for /usr/sbin/mysqld, which the kernel
         # also applies to the mysqld inside the kind nodes and denies its socket and data paths;
