@@ -1,7 +1,7 @@
 # Two stages: the build stage compiles TypeScript and prunes to production dependencies; the
 # runtime stage is distroless, so production has no shell or package manager (ADR-002).
 
-FROM node:24-trixie-slim@sha256:54f84b4cf8432b21aaffd5d3ce8d41e12cea0d10d33c09d2f3c9879d49d6b446 AS build
+FROM node:26-trixie-slim@sha256:e6bedef217677b276c591795e169840edd9096dbf13f29df8ef8d1856b8820bc AS build
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 WORKDIR /app
 RUN corepack enable
